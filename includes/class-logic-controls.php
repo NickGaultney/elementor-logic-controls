@@ -16,6 +16,9 @@ class Elementor_Logic_Controls {
         // Process and output logic snippets.
         add_action( 'elementor/frontend/before_render', [ __CLASS__, 'collect_logic_snippets' ] );
         add_action( 'wp_footer', [ __CLASS__, 'render_logic_snippets' ] );
+
+        // Enqueue custom script to initialize CodeMirror
+        add_action('elementor/editor/after_enqueue_scripts', [ __CLASS__, 'initialize_codemirror' ] );
     }
 
     /**
@@ -135,5 +138,15 @@ class Elementor_Logic_Controls {
 
         echo "};\n";
         echo "</script>\n";
+    }
+
+    public static function initialize_codemirror() {
+        wp_enqueue_script(
+            'custom-logic-editor',
+            plugin_dir_url(__FILE__) . 'assets/js/custom-logic-editor.js',
+            ['jquery', 'elementor-editor'],
+            '1.0',
+            true
+        );
     }
 }
