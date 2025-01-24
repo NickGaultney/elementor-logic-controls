@@ -1,6 +1,6 @@
 jQuery(document).ready(function ($) {
     const initCodeMirror = () => {
-        $('.elementor-control-custom_logic textarea').each(function () {
+        $('.elementor-control-js-snippet textarea').each(function () {
             const textarea = $(this);
             if (!textarea.data('codemirror-initialized')) {
                 const editor = wp.codeEditor.initialize(textarea[0], {
