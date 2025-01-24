@@ -11,6 +11,8 @@
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * License:     GPL v2 or later
+ * GitHub Plugin URI: https://github.com/NickGaultney/elementor-logic-controls
+ * Primary Branch: master
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
