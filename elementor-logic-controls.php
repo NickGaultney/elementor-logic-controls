@@ -3,7 +3,7 @@
  * Plugin Name: Elementor Logic Controls
  * Plugin URI:  https://example.com/
  * Description: Adds advanced logic controls to Elementor widgets.
- * Version:     1.0.1
+ * Version:     1.0.2
  * Author:      Nick Gaultney
  * Author URI:  https://gauwebsolutions.com/
  * Text Domain: elementor-logic-controls
