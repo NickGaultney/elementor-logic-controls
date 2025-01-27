@@ -104,7 +104,6 @@ class Elementor_Logic_Controls {
         }
 
         echo "<script>\n";
-        echo "console.log('zoom zoom');\n";
         echo "window.onload = function() {\n";
         echo "const submission = window.pbn?.formEntry?.submission?.response || {};\n"; // Ensure submission data exists
 
