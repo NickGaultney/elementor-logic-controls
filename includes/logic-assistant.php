@@ -64,13 +64,31 @@ class Elementor_Logic_Assistant {
         </div>
 
         <script>
+        function copyToClipboard(text) {
+            const codeElement = event.target;
+            const originalText = codeElement.textContent;
+            
+            navigator.clipboard.writeText('f.' + text).then(() => {
+                // Change appearance to show feedback
+                codeElement.textContent = 'Copied!';
+                codeElement.style.backgroundColor = '#4CAF50';
+                codeElement.style.color = 'white';
+                
+                // Revert back after 1 second
+                setTimeout(() => {
+                    codeElement.textContent = originalText;
+                    codeElement.style.backgroundColor = '';
+                    codeElement.style.color = '';
+                }, 1000);
+            });
+        }
+
         function showFormFields(formId) {
             if (!formId) {
                 document.getElementById('form-fields').innerHTML = '';
                 return;
             }
 
-            // Get form fields using AJAX
             fetch(`<?php echo esc_url(admin_url('admin-ajax.php')); ?>?action=get_form_fields&form_id=${formId}`)
                 .then(response => response.json())
                 .then(data => {
@@ -79,7 +97,7 @@ class Elementor_Logic_Assistant {
                     html += '<ul>';
                     
                     for (const [key, field] of Object.entries(data)) {
-                        html += `<li><code>${key}</code> - ${field.label}</li>`;
+                        html += `<li><code class="field-code" onclick="copyToClipboard('${key}')" title="Click to copy">${key}</code> - ${field.label}</li>`;
                     }
                     
                     html += '</ul>';
@@ -94,6 +112,19 @@ class Elementor_Logic_Assistant {
                 });
         }
         </script>
+
+        <style>
+        .field-code {
+            cursor: pointer;
+            padding: 2px 4px;
+            background: #f5f5f5;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+        }
+        .field-code:hover {
+            background: #e0e0e0;
+        }
+        </style>
         <?php
         return ob_get_clean();
     }
