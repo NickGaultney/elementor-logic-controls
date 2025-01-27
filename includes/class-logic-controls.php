@@ -61,6 +61,7 @@ class Elementor_Logic_Controls {
                 'type'        => \Elementor\Controls_Manager::TEXTAREA,
                 'rows'        => 8,
                 'description' => esc_html__( 'Insert JavaScript code to run for this widget.', 'elementor-logic-controls' ),
+                'default'     => "if () {\nshow()\n} else {\nhide()\n}",
                 'condition'   => [
                     'enable_logic' => 'yes',
                 ],
