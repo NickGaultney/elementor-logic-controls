@@ -27,5 +27,8 @@ define( 'ELC_URL', plugin_dir_url( __FILE__ ) );
 // Include the core plugin file.
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-logic-controls.php';
 
+// Include the logic assistant file.
+require_once plugin_dir_path( __FILE__ ) . 'includes/logic-assistant.php';
+
 // Initialize the plugin.
 add_action( 'plugins_loaded', [ 'Elementor_Logic_Controls', 'init' ] );
