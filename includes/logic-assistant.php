@@ -137,7 +137,7 @@ class Elementor_Logic_Assistant {
         $field_data = [];
         
         // Fields to ignore
-        $ignore_elements = ['custom_html', 'form_step', 'additional_info_field', 'additional_info_scripts'];
+        $ignore_elements = ['custom_html', 'form_step', 'additional_info_field', 'additional_info_scripts', 'section_break'];
 
         foreach ($fields as $field) {
             // Skip ignored elements
