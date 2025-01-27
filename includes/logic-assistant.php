@@ -109,46 +109,71 @@ class Elementor_Logic_Assistant {
 
         $form_id = intval($_GET['form_id']);
         
-        // Get form fields using FluentForm API
-        $form = wpFluent()->table('fluentform_forms')->find($form_id);
-        if (!$form) {
-            wp_send_json_error('Form not found');
-        }
+        try {
+            $formApi = fluentFormApi('forms')->form($form_id);
+            
+            if (!$formApi) {
+                wp_send_json_error('Form not found');
+            }
 
-        $fields = json_decode($form->form_fields, true);
-        $field_data = self::extract_field_data($fields['fields']);
-        
-        wp_send_json($field_data);
+            $fields = $formApi->fields()["fields"];
+            $field_data = self::process_fields($fields);
+
+            wp_send_json($field_data);
+
+        } catch (Exception $e) {
+            error_log('FluentForm API Error: ' . $e->getMessage());
+            wp_send_json_error('Error fetching form fields');
+        }
     }
 
     /**
-     * Extract field data from form fields array
-     *
-     * @param array $fields Form fields array
+     * Process fields recursively to handle containers and nested fields
+     * 
+     * @param array $fields Array of form fields
      * @return array Processed field data
      */
-    private static function extract_field_data($fields) {
+    private static function process_fields($fields) {
         $field_data = [];
         
+        // Fields to ignore
+        $ignore_elements = ['custom_html', 'form_step', 'additional_info_field', 'additional_info_scripts'];
+
         foreach ($fields as $field) {
-            if (!isset($field['attributes']['name']) || !isset($field['settings']['label'])) {
+            // Skip ignored elements
+            if (in_array($field['element'], $ignore_elements)) {
                 continue;
             }
 
-            $field_data[$field['attributes']['name']] = [
-                'label' => $field['settings']['label'],
-                'type' => $field['element']
-            ];
-
-            // Handle repeater fields
-            if (isset($field['columns']) && is_array($field['columns'])) {
-                foreach ($field['columns'] as $column) {
-                    if (isset($column['fields']) && is_array($column['fields'])) {
-                        $field_data = array_merge(
-                            $field_data, 
-                            self::extract_field_data($column['fields'])
-                        );
+            if ($field['element'] === 'container') {
+                // Process container columns
+                if (isset($field['columns']) && is_array($field['columns'])) {
+                    foreach ($field['columns'] as $column) {
+                        if (isset($column['fields']) && is_array($column['fields'])) {
+                            // Recursively process fields in each column
+                            $field_data = array_merge($field_data, self::process_fields($column['fields']));
+                        }
                     }
+                }
+            } else {
+                // For hidden inputs, only check for name
+                if ($field['element'] === 'input_hidden') {
+                    if (!isset($field["attributes"]['name'])) {
+                        continue;
+                    }
+                    $field_data[$field["attributes"]['name']] = [
+                        'label' => '',
+                        'type' => $field["element"]
+                    ];
+                } else {
+                    // Process regular field
+                    if (!isset($field["attributes"]['name']) || !isset($field["settings"]['label'])) {
+                        continue;
+                    }
+                    $field_data[$field["attributes"]['name']] = [
+                        'label' => $field["settings"]['label'],
+                        'type' => $field["element"]
+                    ];
                 }
             }
         }

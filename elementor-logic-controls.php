@@ -3,7 +3,7 @@
  * Plugin Name: Elementor Logic Controls
  * Plugin URI:  https://example.com/
  * Description: Adds advanced logic controls to Elementor widgets.
- * Version:     1.0.4
+ * Version:     1.0.5
  * Author:      Nick Gaultney
  * Author URI:  https://gauwebsolutions.com/
  * Text Domain: elementor-logic-controls
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'ELC_VERSION', '1.0.4' );
+define( 'ELC_VERSION', '1.0.5' );
 define( 'ELC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ELC_URL', plugin_dir_url( __FILE__ ) );
 
