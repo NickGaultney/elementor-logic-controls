@@ -100,43 +100,49 @@ class Elementor_Logic_Controls {
      * Render collected logic snippets in the footer.
      */
     public static function render_logic_snippets() {
-        if ( empty( $GLOBALS['elc_js_snippets'] ) ) {
+        if (empty($GLOBALS['elc_js_snippets'])) {
             return;
         }
 
         echo "<script>\n";
-        echo "window.onload = function() {\n";
-        echo "const submission = window.pbn?.formEntry?.submission?.response || {};\n"; // Ensure submission data exists
-
+        
+        // Create the initialization function
+        echo "function initializeLogicSnippets(submission) {\n";
+        
         // Provide utility functions for hide/show
-        echo "function show(id) { \n";
-        echo "    var element = document.querySelector('[data-id=\"' + id + '\"]'); \n";
-        echo "    if (element) { \n";
-        echo "        element.style.display = ''; \n";
-        echo "    } \n";
-        echo "} \n\n";
+        echo "    function show(id) { \n";
+        echo "        var element = document.querySelector('[data-id=\"' + id + '\"]'); \n";
+        echo "        if (element) { \n";
+        echo "            element.style.display = ''; \n";
+        echo "        } \n";
+        echo "    } \n\n";
 
-        echo "function hide(id) { \n";
-        echo "    var element = document.querySelector('[data-id=\"' + id + '\"]'); \n";
-        echo "    if (element) { \n";
-        echo "        element.style.display = 'none'; \n";
-        echo "    } \n";
-        echo "} \n\n";
+        echo "    function hide(id) { \n";
+        echo "        var element = document.querySelector('[data-id=\"' + id + '\"]'); \n";
+        echo "        if (element) { \n";
+        echo "            element.style.display = 'none'; \n";
+        echo "        } \n";
+        echo "    } \n\n";
 
         // Execute logic snippets for each widget
-        foreach ( $GLOBALS['elc_js_snippets'] as $snippet_data ) {
+        foreach ($GLOBALS['elc_js_snippets'] as $snippet_data) {
             $widget_id = $snippet_data['id'];
-            $snippet   = $snippet_data['snippet'];
+            $snippet = $snippet_data['snippet'];
 
-            // Wrap the snippet in a try-catch to prevent breaking other logic
-            echo "try {\n";
-            echo "    (function(s, hide, show) {\n";
-            echo $snippet . "\n"; // Execute the developer's snippet
-            echo "})(submission, function() { hide(\"$widget_id\"); }, function() { show(\"$widget_id\"); });\n";
-            echo "} catch (e) { console.error('Error in widget logic for ID: ${widget_id}', e); }\n";
+            echo "    try {\n";
+            echo "        (function(s, hide, show) {\n";
+            echo "            " . $snippet . "\n";
+            echo "        })(submission, function() { hide(\"$widget_id\"); }, function() { show(\"$widget_id\"); });\n";
+            echo "    } catch (e) { console.error('Error in widget logic for ID: ${widget_id}', e); }\n";
         }
 
-        echo "};\n";
+        echo "}\n\n";
+
+        // Add event listener for custom event
+        echo "document.addEventListener('logicDataReady', function(e) {\n";
+        echo "    initializeLogicSnippets(e.detail.submission);\n";
+        echo "});\n";
+
         echo "</script>\n";
     }
 
