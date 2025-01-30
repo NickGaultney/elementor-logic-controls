@@ -41,10 +41,9 @@ class Elementor_Logic_Controls {
                     if ($entry && isset($entry['submission'])) {
                         // Get response from submission object
                         $submission = $entry['submission'];
-                        do_action( 'qm/debug', $submission['attributes']['response'] );
-                        if (isset($submission->attributes['response']) && is_array($submission->attributes['response'])) {
-                            self::$submission_data = $submission->attributes['response'];
-                            
+
+                        if (isset($submission['attributes']['response']) && is_array($submission['attributes']['response'])) {
+                            self::$submission_data = $submission['attributes']['response'];
                         }
                     }
                 }
