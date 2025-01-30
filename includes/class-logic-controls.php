@@ -161,7 +161,7 @@ class Elementor_Logic_Controls {
                     
                     function contains($field, ...$values) {
                         global $s;
-                        do_action("qm/debug", isset($s[$field]));
+                        do_action("qm/debug", $s);
                         return isset($s[$field]) && is_array($s[$field]) && !empty(array_intersect($s[$field], $values));
                     }
                     
