@@ -189,9 +189,18 @@ class Elementor_Logic_Controls {
                 $GLOBALS["show"] = true; // Show element if there's an error
             }
 
-            // Apply the visibility
+            // Prevent rendering if hide() was called
             if (!$GLOBALS["show"]) {
-                $element->add_render_attribute('_wrapper', 'class', 'elementor-hidden');
+                // This will prevent the element from being rendered at all
+                $element->set_render_attribute('_wrapper', 'class', ['elementor-hidden', 'elementor-hidden-rendered']);
+                add_filter('elementor/element/get_child_type', function($child_type, $data) use ($element) {
+                    if ($data['id'] === $element->get_id()) {
+                        return false;
+                    }
+                    return $child_type;
+                }, 10, 2);
+                $element->set_settings('enabled', false);
+                return false;
             }
 
             // Clean up global variable
