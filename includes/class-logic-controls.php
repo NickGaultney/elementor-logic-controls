@@ -142,50 +142,55 @@ class Elementor_Logic_Controls {
 
         if (isset($settings['enable_logic']) && 'yes' === $settings['enable_logic'] && !empty($settings['php_snippet'])) {
             $s = self::get_submission_data(); // Use $s as shorthand for submission
-            $show = true; // Default to showing the element
             
-            // Create isolated scope for the PHP snippet with helper functions
-            (function($s) use ($settings, &$show) {
-                try {
-                    // Define helper functions in the local scope
-                    $show = function() use (&$show) { 
-                        $show = true; 
-                    };
+            try {
+                // Create the helper functions in the snippet's scope
+                $snippet = '
+                    function show() { 
+                        $GLOBALS["show"] = true; 
+                    }
                     
-                    $hide = function() use (&$show) { 
-                        $show = false; 
-                    };
+                    function hide() { 
+                        $GLOBALS["show"] = false; 
+                    }
                     
-                    // Additional helper functions
-                    $contains = function($field, ...$values) use ($s) {
+                    function contains($field, ...$values) {
+                        global $s;
                         return isset($s[$field]) && in_array($s[$field], $values);
-                    };
+                    }
                     
-                    $not_contains = function($field, ...$values) use ($s) {
+                    function not_contains($field, ...$values) {
+                        global $s;
                         return !isset($s[$field]) || !in_array($s[$field], $values);
-                    };
+                    }
                     
-                    $is_empty = function($field) use ($s) {
+                    function is_empty($field) {
+                        global $s;
                         return !isset($s[$field]) || empty($s[$field]);
-                    };
+                    }
                     
-                    $not_empty = function($field) use ($s) {
+                    function not_empty($field) {
+                        global $s;
                         return isset($s[$field]) && !empty($s[$field]);
-                    };
-                    
-                    // Execute the user's logic snippet
-                    eval($settings['php_snippet']);
-                    
-                } catch (ParseError $e) {
-                    error_log('Logic Parse Error: ' . $e->getMessage());
-                    $show = true; // Show element if there's an error
-                }
-            })($s);
+                    }
+
+                    ' . $settings['php_snippet'];
+                
+                // Execute the snippet
+                eval($snippet);
+                
+            } catch (ParseError $e) {
+                error_log('Logic Parse Error: ' . $e->getMessage());
+                $GLOBALS["show"] = true; // Show element if there's an error
+            }
 
             // Apply the visibility
-            if (!$show) {
+            if (!$GLOBALS["show"]) {
                 $element->add_render_attribute('_wrapper', 'class', 'elementor-hidden');
             }
+
+            // Clean up global variable
+            unset($GLOBALS["show"]);
         }
     }
 
