@@ -109,7 +109,7 @@ class Elementor_Logic_Controls {
         // Create the initialization function
         echo "function initializeLogicSnippets(submission) {\n";
         
-        // Provide utility functions for hide/show
+        // Provide utility functions for hide/show and array helpers
         echo "    function show(id) { \n";
         echo "        var element = document.querySelector('[data-id=\"' + id + '\"]'); \n";
         echo "        if (element) { \n";
@@ -123,6 +123,20 @@ class Elementor_Logic_Controls {
         echo "            element.style.display = 'none'; \n";
         echo "        } \n";
         echo "    } \n\n";
+
+        echo "    // Add contains method to Array prototype\n";
+        echo "    if (!Array.prototype.contains) {\n";
+        echo "        Array.prototype.contains = function(...args) {\n";
+        echo "            return args.some(arg => this.includes(arg));\n";
+        echo "        };\n";
+        echo "    }\n\n";
+
+        echo "    // Add notContains method to Array prototype\n";
+        echo "    if (!Array.prototype.notContains) {\n";
+        echo "        Array.prototype.notContains = function(...args) {\n";
+        echo "            return !this.contains(...args);\n";
+        echo "        };\n";
+        echo "    }\n\n";
 
         // Execute logic snippets for each widget
         foreach ($GLOBALS['elc_js_snippets'] as $snippet_data) {
@@ -145,7 +159,6 @@ class Elementor_Logic_Controls {
 
         echo "</script>\n";
     }
-
     public static function initialize_codemirror() {
         wp_enqueue_script(
             'custom-logic-editor',
