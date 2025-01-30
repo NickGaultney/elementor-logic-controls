@@ -39,7 +39,17 @@ class Elementor_Logic_Controls {
                     $entry = $formApi->entry($decodedEntryId, false);
 
                     if ($entry) {
-                        self::$submission_data = $entry->response;
+                        // Check if response is an array or object and handle accordingly
+                        if (is_array($entry)) {
+                            self::$submission_data = $entry['response'] ?? [];
+                        } else {
+                            self::$submission_data = $entry->response ?? [];
+                        }
+
+                        // If response is JSON string, decode it
+                        if (is_string(self::$submission_data)) {
+                            self::$submission_data = json_decode(self::$submission_data, true) ?? [];
+                        }
                     }
                 }
             } catch (Exception $e) {
@@ -192,32 +202,6 @@ class Elementor_Logic_Controls {
             // Clean up global variable
             unset($GLOBALS["show"]);
         }
-    }
-
-    public static function get_entry_by_results_id() {
-        // Get the results_id parameter from the request
-        $results_id = sanitize_text_field($_GET['results_id'] ?? '');
-    
-        if (empty($results_id)) {
-            wp_send_json_error(['message' => 'results_id parameter is missing.'], 400);
-        }
-        /**
-        * Get the form entry instance first 
-        * @param $formId (int)
-        * @return null or Entry Object Instance
-        */
-        [$decodedEntryId, $decodedFormId] = decode_form_id($results_id, "d001dda9-0e66-4b6c-ae3e-609d70780b55");
-        
-        $formApi = fluentFormApi('forms')->entryInstance($formId = $decodedFormId);
-        $entry = $formApi->entry($entryId = $decodedEntryId, $includeFormats = false);
-    
-        if (!$entry) {
-            wp_send_json_error(['message' => 'Entry not found...'], 404);
-        }
-    
-        //error_log(print_r($entry, true));
-        // Return the matching entry
-        wp_send_json_success(['entry' => $entry]);
     }
     
     /**
