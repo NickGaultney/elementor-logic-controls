@@ -161,12 +161,12 @@ class Elementor_Logic_Controls {
                     
                     function contains($field, ...$values) {
                         global $s;
-                        return isset($s[$field]) && in_array($s[$field], $values);
+                        return isset($s[$field]) && is_array($s[$field]) && !empty(array_intersect($s[$field], $values));
                     }
                     
                     function not_contains($field, ...$values) {
                         global $s;
-                        return !isset($s[$field]) || !in_array($s[$field], $values);
+                        return isset($s[$field]) && is_array($s[$field]) && empty(array_intersect($s[$field], $values));
                     }
                     
                     function is_empty($field) {
