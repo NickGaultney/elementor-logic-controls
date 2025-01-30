@@ -28,30 +28,22 @@ class Elementor_Logic_Controls {
 
         // Get the results_id from URL
         $results_id = sanitize_text_field($_GET['results_id'] ?? '');
-        do_action( 'qm/debug', $results_id );
+
         if ($results_id) {
             try {
                 // Decode the results ID and get the entry
                 [$decodedEntryId, $decodedFormId] = self::decode_form_id($results_id, "d001dda9-0e66-4b6c-ae3e-609d70780b55");
                 
-                do_action( 'qm/debug', $decodedEntryId );
-                do_action( 'qm/debug', $decodedFormId );
                 if ($decodedEntryId && $decodedFormId) {
                     $formApi = fluentFormApi('forms')->entryInstance($decodedFormId);
                     $entry = $formApi->entry($decodedEntryId, false);
 
-                    if ($entry) {
-                        do_action( 'qm/debug', $entry );
-                        // Check if response is an array or object and handle accordingly
-                        if (is_array($entry)) {
-                            self::$submission_data = $entry['response'] ?? [];
-                        } else {
-                            self::$submission_data = $entry->response ?? [];
-                        }
-
-                        // If response is JSON string, decode it
-                        if (is_string(self::$submission_data)) {
-                            self::$submission_data = json_decode(self::$submission_data, true) ?? [];
+                    if ($entry && isset($entry['submission'])) {
+                        // Get response from submission object
+                        $submission = $entry['submission'];
+                        if (isset($submission->attributes['response']) && is_array($submission->attributes['response'])) {
+                            self::$submission_data = $submission->attributes['response'];
+                            do_action( 'qm/debug', $submission->attributes['response'] );
                         }
                     }
                 }
