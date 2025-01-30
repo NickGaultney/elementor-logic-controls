@@ -112,6 +112,21 @@ class Elementor_Logic_Controls {
             ]
         );
 
+        $element->add_control(
+            'js_snippet',
+            [
+                'label'       => esc_html__('JS Logic', 'elementor-logic-controls'),
+                'type'        => \Elementor\Controls_Manager::TEXTAREA,
+                'rows'        => 8,
+                'description' => esc_html__('Use $s[\'field_name\'] to access form fields. Call show() or hide() based on your conditions.', 'elementor-logic-controls'),
+                'default'     => "",
+                'condition'   => [
+                    'enable_logic' => 'yes',
+                ],
+                'render_type' => 'none',
+            ]
+        );
+
         $element->end_controls_section();
     }
 
