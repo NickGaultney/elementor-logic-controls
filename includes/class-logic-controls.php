@@ -151,6 +151,8 @@ class Elementor_Logic_Controls {
             try {
                 // Create the helper functions in the snippet's scope
                 $snippet = '
+                    $s = ' . var_export($s, true) . ';
+                    
                     function show() { 
                         $GLOBALS["show"] = true; 
                     }
@@ -161,7 +163,6 @@ class Elementor_Logic_Controls {
                     
                     function contains($field, ...$values) {
                         global $s;
-                        do_action("qm/debug", $s);
                         return isset($s[$field]) && is_array($s[$field]) && !empty(array_intersect($s[$field], $values));
                     }
                     
