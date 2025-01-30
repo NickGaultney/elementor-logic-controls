@@ -1,13 +1,15 @@
 jQuery(document).ready(function ($) {
     const initCodeMirror = () => {
-        $('.elementor-control-js-snippet textarea').each(function () {
+        $('.elementor-control-php_snippet textarea').each(function () {
             const textarea = $(this);
             if (!textarea.data('codemirror-initialized')) {
                 const editor = wp.codeEditor.initialize(textarea[0], {
                     codemirror: {
-                        mode: 'javascript', // Set the appropriate mode for your "Logic"
+                        mode: 'php',
                         lineNumbers: true,
-                        theme: 'default', // Use Elementor's theme or specify another
+                        matchBrackets: true,
+                        autoCloseBrackets: true,
+                        theme: 'default',
                     },
                 });
                 textarea.data('codemirror-initialized', true);

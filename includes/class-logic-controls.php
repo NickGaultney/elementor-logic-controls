@@ -7,17 +7,60 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Elementor_Logic_Controls {
 
     /**
+     * Cached submission data
+     * @var array|null
+     */
+    private static $submission_data = null;
+
+    /**
+     * Get submission data, fetching only once per page load
+     * 
+     * @return array|null
+     */
+    private static function get_submission_data() {
+        // Return cached data if already fetched
+        if (self::$submission_data !== null) {
+            return self::$submission_data;
+        }
+
+        // Initialize with empty array
+        self::$submission_data = [];
+
+        // Get the results_id from URL
+        $results_id = sanitize_text_field($_GET['results_id'] ?? '');
+        
+        if ($results_id) {
+            try {
+                // Decode the results ID and get the entry
+                [$decodedEntryId, $decodedFormId] = self::decode_form_id($results_id, "d001dda9-0e66-4b6c-ae3e-609d70780b55");
+                
+                if ($decodedEntryId && $decodedFormId) {
+                    $formApi = fluentFormApi('forms')->entryInstance($decodedFormId);
+                    $entry = $formApi->entry($decodedEntryId, false);
+
+                    if ($entry) {
+                        self::$submission_data = $entry->response;
+                    }
+                }
+            } catch (Exception $e) {
+                error_log('Submission Data Fetch Error: ' . $e->getMessage());
+            }
+        }
+
+        return self::$submission_data;
+    }
+
+    /**
      * Initialize the plugin.
      */
     public static function init() {
         // Add logic controls to Elementor elements.
         add_action( 'elementor/element/after_section_end', [ __CLASS__, 'add_logic_controls' ], 10, 3 );
 
-        // Process and output logic snippets.
+        // Process logic before rendering
         add_action( 'elementor/frontend/before_render', [ __CLASS__, 'collect_logic_snippets' ] );
-        add_action( 'wp_footer', [ __CLASS__, 'render_logic_snippets' ] );
 
-        // Enqueue custom script to initialize CodeMirror
+        // Initialize CodeMirror for PHP editing
         add_action('elementor/editor/after_enqueue_scripts', [ __CLASS__, 'initialize_codemirror' ] );
     }
 
@@ -55,13 +98,13 @@ class Elementor_Logic_Controls {
         );
 
         $element->add_control(
-            'js_snippet',
+            'php_snippet',
             [
-                'label'       => esc_html__( 'JS Snippet', 'elementor-logic-controls' ),
+                'label'       => esc_html__('PHP Logic', 'elementor-logic-controls'),
                 'type'        => \Elementor\Controls_Manager::TEXTAREA,
                 'rows'        => 8,
-                'description' => esc_html__( 'Insert JavaScript code to run for this widget.', 'elementor-logic-controls' ),
-                'default'     => "if () {\n  show()\n} else {\n  hide()\n}",
+                'description' => esc_html__('Use $s[\'field_name\'] to access form fields. Call show() or hide() based on your conditions.', 'elementor-logic-controls'),
+                'default'     => "if (\$s['field_name'] === 'value') {\n    show();\n} else {\n    hide();\n}",
                 'condition'   => [
                     'enable_logic' => 'yes',
                 ],
@@ -73,98 +116,142 @@ class Elementor_Logic_Controls {
     }
 
     /**
-     * Collect logic snippets from Elementor widgets.
-     *
-     * @param \Elementor\Element_Base $element The element instance.
+     * Process logic snippets before rendering
      */
-    public static function collect_logic_snippets( $element ) {
-        if ( isset( $_GET['action'] ) && 'elementor' === $_GET['action'] ) {
-            return; // Skip in editor mode.
+    public static function collect_logic_snippets($element) {
+        if (isset($_GET['action']) && 'elementor' === $_GET['action']) {
+            return; // Skip in editor mode
         }
 
         $settings = $element->get_settings_for_display();
 
-        if ( isset( $settings['enable_logic'] ) && 'yes' === $settings['enable_logic'] && ! empty( $settings['js_snippet'] ) ) {
-            if ( ! isset( $GLOBALS['elc_js_snippets'] ) || ! is_array( $GLOBALS['elc_js_snippets'] ) ) {
-                $GLOBALS['elc_js_snippets'] = [];
-            }
+        if (isset($settings['enable_logic']) && 'yes' === $settings['enable_logic'] && !empty($settings['php_snippet'])) {
+            $s = self::get_submission_data(); // Use $s as shorthand for submission
+            $show = true; // Default to showing the element
+            
+            // Create isolated scope for the PHP snippet with helper functions
+            (function($s) use ($settings, &$show) {
+                try {
+                    // Define helper functions in the local scope
+                    $show = function() use (&$show) { 
+                        $show = true; 
+                    };
+                    
+                    $hide = function() use (&$show) { 
+                        $show = false; 
+                    };
+                    
+                    // Additional helper functions
+                    $contains = function($field, ...$values) use ($s) {
+                        return isset($s[$field]) && in_array($s[$field], $values);
+                    };
+                    
+                    $not_contains = function($field, ...$values) use ($s) {
+                        return !isset($s[$field]) || !in_array($s[$field], $values);
+                    };
+                    
+                    $is_empty = function($field) use ($s) {
+                        return !isset($s[$field]) || empty($s[$field]);
+                    };
+                    
+                    $not_empty = function($field) use ($s) {
+                        return isset($s[$field]) && !empty($s[$field]);
+                    };
+                    
+                    // Execute the user's logic snippet
+                    eval($settings['php_snippet']);
+                    
+                } catch (ParseError $e) {
+                    error_log('Logic Parse Error: ' . $e->getMessage());
+                    $show = true; // Show element if there's an error
+                }
+            })($s);
 
-            $GLOBALS['elc_js_snippets'][] = [
-                'id'      => $element->get_id(),
-                'snippet' => $settings['js_snippet'],
-            ];
+            // Apply the visibility
+            if (!$show) {
+                $element->add_render_attribute('_wrapper', 'class', 'elementor-hidden');
+            }
         }
+    }
+
+    public static function get_entry_by_results_id() {
+        // Get the results_id parameter from the request
+        $results_id = sanitize_text_field($_GET['results_id'] ?? '');
+    
+        if (empty($results_id)) {
+            wp_send_json_error(['message' => 'results_id parameter is missing.'], 400);
+        }
+        /**
+        * Get the form entry instance first 
+        * @param $formId (int)
+        * @return null or Entry Object Instance
+        */
+        [$decodedEntryId, $decodedFormId] = decode_form_id($results_id, "d001dda9-0e66-4b6c-ae3e-609d70780b55");
+        
+        $formApi = fluentFormApi('forms')->entryInstance($formId = $decodedFormId);
+        $entry = $formApi->entry($entryId = $decodedEntryId, $includeFormats = false);
+    
+        if (!$entry) {
+            wp_send_json_error(['message' => 'Entry not found...'], 404);
+        }
+    
+        //error_log(print_r($entry, true));
+        // Return the matching entry
+        wp_send_json_success(['entry' => $entry]);
+    }
+    
+    /**
+     * Validates and decodes a results_id back into the original form ID.
+     *
+     * @param string $resultsId The encoded results_id.
+     * @param string $secretKey The same secret key used for encoding.
+     * @return int|null The original form ID, or null if validation fails.
+     */
+    public static function decode_form_id(string $resultsId, string $secretKey): ?array
+    {
+        // Reverse URL-safe Base64 encoding
+        $encoded = strtr($resultsId, '-_', '+/');
+    
+        // Decode the Base64 data
+        $decoded = base64_decode($encoded, true);
+    
+        // If decoding fails, return null
+        if ($decoded === false) {
+            return null;
+        }
+    
+        // Split the decoded data to retrieve the form ID and the hash
+        $parts = explode(':', $decoded);
+    
+        // Validate the format
+        if (count($parts) !== 3) {
+            return null;
+        }
+    
+        [$entryId, $formId, $hash] = $parts;
+    
+        // Recompute the hash for the form ID using the secret key
+        $expectedHash = hash_hmac('sha256', $formId, $secretKey);
+    
+        // Verify the hash matches
+        if (!hash_equals($expectedHash, $hash)) {
+            return null;
+        }
+    
+        // Return the form ID as an integer
+        return [$entryId, $formId];
     }
 
     /**
-     * Render collected logic snippets in the footer.
+     * Initialize CodeMirror for PHP editing
      */
-    public static function render_logic_snippets() {
-        if (empty($GLOBALS['elc_js_snippets'])) {
-            return;
-        }
-
-        echo "<script>\n";
-        
-        // Create the initialization function
-        echo "function initializeLogicSnippets(submission) {\n";
-        
-        // Provide utility functions for hide/show and array helpers
-        echo "    function show(id) { \n";
-        echo "        var element = document.querySelector('[data-id=\"' + id + '\"]'); \n";
-        echo "        if (element) { \n";
-        echo "            element.style.display = ''; \n";
-        echo "        } \n";
-        echo "    } \n\n";
-
-        echo "    function hide(id) { \n";
-        echo "        var element = document.querySelector('[data-id=\"' + id + '\"]'); \n";
-        echo "        if (element) { \n";
-        echo "            element.remove(); \n";
-        echo "        } \n";
-        echo "    } \n\n";
-
-        echo "    // Add contains method to Array prototype\n";
-        echo "    if (!Array.prototype.contains) {\n";
-        echo "        Array.prototype.contains = function(...args) {\n";
-        echo "            return args.some(arg => this.includes(arg));\n";
-        echo "        };\n";
-        echo "    }\n\n";
-
-        echo "    // Add notContains method to Array prototype\n";
-        echo "    if (!Array.prototype.notContains) {\n";
-        echo "        Array.prototype.notContains = function(...args) {\n";
-        echo "            return !this.contains(...args);\n";
-        echo "        };\n";
-        echo "    }\n\n";
-
-        // Execute logic snippets for each widget
-        foreach ($GLOBALS['elc_js_snippets'] as $snippet_data) {
-            $widget_id = $snippet_data['id'];
-            $snippet = $snippet_data['snippet'];
-
-            echo "    try {\n";
-            echo "        (function(s, hide, show) {\n";
-            echo "            " . $snippet . "\n";
-            echo "        })(submission, function() { hide(\"$widget_id\"); }, function() { show(\"$widget_id\"); });\n";
-            echo "    } catch (e) { console.error('Error in widget logic for ID: ${widget_id}', e); }\n";
-        }
-
-        echo "}\n\n";
-
-        // Add event listener for custom event
-        echo "document.addEventListener('logicDataReady', function(e) {\n";
-        echo "    initializeLogicSnippets(e.detail.submission);\n";
-        echo "});\n";
-
-        echo "</script>\n";
-    }
     public static function initialize_codemirror() {
+        wp_enqueue_code_editor(['type' => 'text/x-php']);
         wp_enqueue_script(
             'custom-logic-editor',
             plugin_dir_url(__FILE__) . 'assets/js/custom-logic-editor.js',
             ['jquery', 'elementor-editor'],
-            '1.0',
+            ELC_VERSION,
             true
         );
     }
