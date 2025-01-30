@@ -120,7 +120,7 @@ class Elementor_Logic_Controls {
         echo "    function hide(id) { \n";
         echo "        var element = document.querySelector('[data-id=\"' + id + '\"]'); \n";
         echo "        if (element) { \n";
-        echo "            element.style.display = 'none'; \n";
+        echo "            element.remove(); \n";
         echo "        } \n";
         echo "    } \n\n";
 
