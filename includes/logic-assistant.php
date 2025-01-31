@@ -33,7 +33,7 @@ class Elementor_Logic_Assistant {
             true
         );
 
-        wp_localize_script('logic-assistant', 'logicAssistant', [
+        wp_localize_script('logic-assistant', 'logicAssistantData', [
             'ajaxurl' => admin_url('admin-ajax.php')
         ]);
     }

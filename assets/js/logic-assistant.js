@@ -1,4 +1,4 @@
-const logicAssistant = {
+window.logicAssistant = {
     copyToClipboard: function(text) {
         const codeElement = event.target;
         const originalText = codeElement.textContent;
@@ -24,7 +24,7 @@ const logicAssistant = {
             return;
         }
 
-        fetch(`${logicAssistant.ajaxurl}?action=get_form_fields&form_id=${formId}`)
+        fetch(window.logicAssistantData.ajaxurl + '?action=get_form_fields&form_id=' + formId)
             .then(response => response.json())
             .then(data => {
                 let html = '<div class="fields-list">';
