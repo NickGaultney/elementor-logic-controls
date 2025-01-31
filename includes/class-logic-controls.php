@@ -144,6 +144,14 @@ class Elementor_Logic_Controls {
         }
 
         $settings = $element->get_settings_for_display();
+        if ( 'container' === $element->get_type() ) {
+            // Use the container's unique selector as the key
+            $element->add_render_attribute(
+                '_wrapper', 
+                'style', 
+                'display: none;' 
+            );
+        }
 
         if (isset($settings['enable_logic']) && 'yes' === $settings['enable_logic'] && !empty($settings['php_snippet'])) {
             $s = self::get_submission_data(); // Use $s as shorthand for submission
@@ -184,7 +192,6 @@ class Elementor_Logic_Controls {
 
             // Prevent rendering if hide() was called
             if (!$GLOBALS["pbn_show"]) {
-                do_action( 'qm/debug', $element->get_type() );
                 // For a Container:
                 if ( 'container' === $element->get_type() ) {
                     // Use the container's unique selector as the key
@@ -198,7 +205,6 @@ class Elementor_Logic_Controls {
 
             // Clean up global variable
             unset($GLOBALS["pbn_show"]);
-            unset($GLOBALS["pbn_submission"]);
         }
     }
     
