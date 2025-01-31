@@ -53,4 +53,17 @@
     border-radius: 3px;
     color: #e83e8c;
     font-size: 0.9em;
+}
+
+/* Add back the cursor styles */
+.field-code {
+    cursor: pointer;
+    padding: 2px 4px;
+    background: #f5f5f5;
+    border-radius: 3px;
+    transition: all 0.2s ease;
+}
+
+.field-code:hover {
+    background: #e0e0e0;
 } 
