@@ -186,14 +186,12 @@ class Elementor_Logic_Controls {
             if (!$GLOBALS["pbn_show"]) {
                 // For a Container:
                 if ( 'container' === $element->get_type() ) {
-                    if ( /* condition to hide */ ) {
-                        // Use the container's unique selector as the key
-                        $element->add_render_attribute(
-                            $element->get_unique_selector(),
-                            'style',
-                            'display: none;'
-                        );
-                    }
+                    // Use the container's unique selector as the key
+                    $element->add_render_attribute(
+                        $element->get_unique_selector(),
+                        'style',
+                        'display: none;'
+                    );
                 }
             }
 
