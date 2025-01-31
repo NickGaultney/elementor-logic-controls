@@ -143,15 +143,7 @@ class Elementor_Logic_Controls {
             return; // Skip in editor mode
         }
 
-        $settings = $element->get_settings_for_display();
-        if ( 'container' === $element->get_type() ) {
-            // Use the container's unique selector as the key
-            $element->add_render_attribute(
-                '_wrapper', 
-                'style', 
-                'display: none;' 
-            );
-        }
+        error_log( 'yes I was called' );
 
         if (isset($settings['enable_logic']) && 'yes' === $settings['enable_logic'] && !empty($settings['php_snippet'])) {
             $s = self::get_submission_data(); // Use $s as shorthand for submission
