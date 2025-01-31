@@ -276,33 +276,33 @@ class Elementor_Logic_Controls {
     }
 
     // Helper functions moved outside of collect_logic_snippets
-    private static function logic_show() {
+    protected static function logic_show() {
         self::$show = true;
     }
     
-    private static function logic_hide() {
+    protected static function logic_hide() {
         self::$show = false;
     }
     
-    private static function logic_contains($field_array, ...$values) {
+    protected static function logic_contains($field_array, ...$values) {
         return isset($field_array) && 
                is_array($field_array) && 
                !empty(array_intersect($field_array, $values));
     }
     
-    private static function logic_not_contains($field_array, ...$values) {
+    protected static function logic_not_contains($field_array, ...$values) {
         return isset($field_array) && 
                is_array($field_array) && 
                empty(array_intersect($field_array, $values));
     }
     
-    private static function logic_is_empty($field_array) {
+    protected static function logic_is_empty($field_array) {
         return !isset($field_array) || 
                !is_array($field_array) || 
                empty($field_array);
     }
     
-    private static function logic_not_empty($field_array) {
+    protected static function logic_not_empty($field_array) {
         return isset($field_array) && 
                is_array($field_array) && 
                !empty($field_array);
