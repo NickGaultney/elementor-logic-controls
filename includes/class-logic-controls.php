@@ -60,10 +60,10 @@ class Elementor_Logic_Controls {
      */
     public static function init() {
         // Add logic controls to Elementor elements.
-        add_action( 'elementor/element/after_section_end', [ __CLASS__, 'add_logic_controls' ], 10, 3 );
+        add_action('elementor/element/after_section_end', [__CLASS__, 'add_logic_controls'], 10, 3);
 
-        // Process logic before rendering
-        add_action( 'elementor/frontend/before_render', [ __CLASS__, 'collect_logic_snippets' ] );
+        // Process logic after rendering
+        add_action('elementor/frontend/after_render', [__CLASS__, 'collect_logic_snippets']);
 
         // Initialize CodeMirror for PHP editing
         //add_action('elementor/editor/after_enqueue_scripts', [ __CLASS__, 'initialize_codemirror' ] );
@@ -136,72 +136,72 @@ class Elementor_Logic_Controls {
     }
 
     /**
-     * Process logic snippets before rendering
+     * Process logic snippets after rendering
      */
     public static function collect_logic_snippets($element) {
         if (isset($_GET['action']) && 'elementor' === $_GET['action']) {
             return; // Skip in editor mode
         }
 
-        ?>
-            <div class="before-element">Text before element</div>
-        <?php
+        $settings = $element->get_settings_for_display();
 
-        // $settings = $element->get_settings_for_display();
+        if (isset($settings['enable_logic']) && 'yes' === $settings['enable_logic'] && !empty($settings['php_snippet'])) {
+            $s = self::get_submission_data(); // Use $s as shorthand for submission
+            $GLOBALS["pbn_show"] = false;
 
-        // if (isset($settings['enable_logic']) && 'yes' === $settings['enable_logic'] && !empty($settings['php_snippet'])) {
-        //     $s = self::get_submission_data(); // Use $s as shorthand for submission
-        //     $GLOBALS["pbn_show"] = false;
-
-        //     function show() { 
-        //         $GLOBALS["pbn_show"] = true; 
-        //     }
+            function show() { 
+                $GLOBALS["pbn_show"] = true; 
+            }
             
-        //     function hide() { 
-        //         $GLOBALS["pbn_show"] = false; 
-        //     }
+            function hide() { 
+                $GLOBALS["pbn_show"] = false; 
+            }
             
-        //     function contains($field, ...$values) {
-        //         return isset($field) && is_array($field) && !empty(array_intersect($field, $values));
-        //     }
+            function contains($field, ...$values) {
+                return isset($field) && is_array($field) && !empty(array_intersect($field, $values));
+            }
             
-        //     function not_contains($field, ...$values) {
-        //         return isset($field) && is_array($field) && empty(array_intersect($field, $values));
-        //     }
+            function not_contains($field, ...$values) {
+                return isset($field) && is_array($field) && empty(array_intersect($field, $values));
+            }
             
-        //     function is_empty($field) {
-        //         return !isset($field) || empty($field);
-        //     }
+            function is_empty($field) {
+                return !isset($field) || empty($field);
+            }
             
-        //     function not_empty($field) {
-        //         return isset($field) && !empty($field);
-        //     }
+            function not_empty($field) {
+                return isset($field) && !empty($field);
+            }
             
-        //     try {
-        //         // Execute the snippet
-        //         eval($settings['php_snippet']);
+            try {
+                // Execute the snippet
+                eval($settings['php_snippet']);
                 
-        //     } catch (ParseError $e) {
-        //         error_log('Logic Parse Error: ' . $e->getMessage());
-        //         $GLOBALS["pbn_show"] = false; // Show element if there's an error
-        //     }
+            } catch (ParseError $e) {
+                error_log('Logic Parse Error: ' . $e->getMessage());
+                $GLOBALS["pbn_show"] = false; // Show element if there's an error
+            }
 
-        //     // Prevent rendering if hide() was called
-        //     if (!$GLOBALS["pbn_show"]) {
-        //         // For a Container:
-        //         if ( 'container' === $element->get_type() ) {
-        //             // Use the container's unique selector as the key
-        //             $element->add_render_attribute(
-        //                 '_wrapper', 
-        //                 'style', 
-        //                 'display: none;' 
-        //             );
-        //         }
-        //     }
+            // If element should be hidden, inject removal script
+            if (!$GLOBALS["pbn_show"]) {
+                $element_id = $element->get_id();
+                
+                // Create script to remove the element
+                $script = "<script>
+                    (function() {
+                        var element = document.querySelector('[data-id=\"{$element_id}\"]');
+                        if (element) {
+                            element.remove();
+                        }
+                    })();
+                </script>";
+                
+                echo $script;
+            }
 
-        //     // Clean up global variable
-        //     unset($GLOBALS["pbn_show"]);
-        //}
+            // Clean up global variable
+            unset($GLOBALS["pbn_show"]);
+        }
     }
     
     /**
