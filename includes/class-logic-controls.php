@@ -147,44 +147,38 @@ class Elementor_Logic_Controls {
 
         if (isset($settings['enable_logic']) && 'yes' === $settings['enable_logic'] && !empty($settings['php_snippet'])) {
             $s = self::get_submission_data(); // Use $s as shorthand for submission
+
+            function show() { 
+                $GLOBALS["show"] = true; 
+            }
+            
+            function hide() { 
+                $GLOBALS["show"] = false; 
+            }
+            
+            function contains($field, ...$values) {
+                global $s;
+                return isset($s[$field]) && is_array($s[$field]) && !empty(array_intersect($s[$field], $values));
+            }
+            
+            function not_contains($field, ...$values) {
+                global $s;
+                return isset($s[$field]) && is_array($s[$field]) && empty(array_intersect($s[$field], $values));
+            }
+            
+            function is_empty($field) {
+                global $s;
+                return !isset($s[$field]) || empty($s[$field]);
+            }
+            
+            function not_empty($field) {
+                global $s;
+                return isset($s[$field]) && !empty($s[$field]);
+            }
             
             try {
-                // Create the helper functions in the snippet's scope
-                $snippet = '
-                    $s = ' . var_export($s, true) . ';
-                    
-                    function show() { 
-                        $GLOBALS["show"] = true; 
-                    }
-                    
-                    function hide() { 
-                        $GLOBALS["show"] = false; 
-                    }
-                    
-                    function contains($field, ...$values) {
-                        global $s;
-                        return isset($s[$field]) && is_array($s[$field]) && !empty(array_intersect($s[$field], $values));
-                    }
-                    
-                    function not_contains($field, ...$values) {
-                        global $s;
-                        return isset($s[$field]) && is_array($s[$field]) && empty(array_intersect($s[$field], $values));
-                    }
-                    
-                    function is_empty($field) {
-                        global $s;
-                        return !isset($s[$field]) || empty($s[$field]);
-                    }
-                    
-                    function not_empty($field) {
-                        global $s;
-                        return isset($s[$field]) && !empty($s[$field]);
-                    }
-
-                    ' . $settings['php_snippet'];
-                
                 // Execute the snippet
-                eval($snippet);
+                eval($settings['php_snippet']);
                 
             } catch (ParseError $e) {
                 error_log('Logic Parse Error: ' . $e->getMessage());
