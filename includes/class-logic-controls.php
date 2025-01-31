@@ -184,6 +184,7 @@ class Elementor_Logic_Controls {
 
             // Prevent rendering if hide() was called
             if (!$GLOBALS["pbn_show"]) {
+                do_action( 'qm/debug', $element->get_type() );
                 // For a Container:
                 if ( 'container' === $element->get_type() ) {
                     // Use the container's unique selector as the key
