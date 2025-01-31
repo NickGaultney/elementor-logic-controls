@@ -184,7 +184,17 @@ class Elementor_Logic_Controls {
 
             // Prevent rendering if hide() was called
             if (!$GLOBALS["pbn_show"]) {
-                $element->set_should_render( false );
+                // For a Container:
+                if ( 'container' === $element->get_type() ) {
+                    if ( /* condition to hide */ ) {
+                        // Use the container's unique selector as the key
+                        $element->add_render_attribute(
+                            $element->get_unique_selector(),
+                            'style',
+                            'display: none;'
+                        );
+                    }
+                }
             }
 
             // Clean up global variable
