@@ -146,7 +146,7 @@ class Elementor_Logic_Controls {
         $settings = $element->get_settings_for_display();
 
         if (isset($settings['enable_logic']) && 'yes' === $settings['enable_logic'] && !empty($settings['php_snippet'])) {
-            $s = self::get_submission_data(); // Use $s as shorthand for submission
+            $sub = self::get_submission_data(); // Use $s as shorthand for submission
 
             function show() { 
                 $GLOBALS["show"] = true; 
@@ -157,26 +157,27 @@ class Elementor_Logic_Controls {
             }
             
             function contains($field, ...$values) {
-                global $s;
-                return isset($s[$field]) && is_array($s[$field]) && !empty(array_intersect($s[$field], $values));
+                global $sub;
+                return isset($sub[$field]) && is_array($sub[$field]) && !empty(array_intersect($sub[$field], $values));
             }
             
             function not_contains($field, ...$values) {
-                global $s;
-                return isset($s[$field]) && is_array($s[$field]) && empty(array_intersect($s[$field], $values));
+                global $sub;
+                return isset($sub[$field]) && is_array($sub[$field]) && empty(array_intersect($sub[$field], $values));
             }
             
             function is_empty($field) {
-                global $s;
-                return !isset($s[$field]) || empty($s[$field]);
+                global $sub;
+                return !isset($sub[$field]) || empty($sub[$field]);
             }
             
             function not_empty($field) {
-                global $s;
-                return isset($s[$field]) && !empty($s[$field]);
+                global $sub;
+                return isset($sub[$field]) && !empty($sub[$field]);
             }
             
             try {
+                $s = $sub;
                 // Execute the snippet
                 eval($settings['php_snippet']);
                 
