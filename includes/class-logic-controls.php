@@ -12,6 +12,7 @@ class Elementor_Logic_Controls {
      */
     private static $submission_data = null;
     private static $show = false;  // Add class property to track visibility
+    private static $functions_declared = false;  // Track if we've declared the functions
 
     /**
      * Get submission data, fetching only once per page load
@@ -154,26 +155,29 @@ class Elementor_Logic_Controls {
             self::$show = false;  // Reset for each element
             
             try {
-                // Create the snippet with function aliases
-                $snippet = '
-                    function show() { \Elementor_Logic_Controls::logic_show(); }
-                    function hide() { \Elementor_Logic_Controls::logic_hide(); }
-                    function contains($field, ...$values) { 
-                        return \Elementor_Logic_Controls::logic_contains($field, ...$values); 
-                    }
-                    function not_contains($field, ...$values) { 
-                        return \Elementor_Logic_Controls::logic_not_contains($field, ...$values); 
-                    }
-                    function is_empty($field) { 
-                        return \Elementor_Logic_Controls::logic_is_empty($field); 
-                    }
-                    function not_empty($field) { 
-                        return \Elementor_Logic_Controls::logic_not_empty($field); 
-                    }
-                    ' . $settings['php_snippet'];
+                // Only declare functions once
+                if (!self::$functions_declared) {
+                    eval('
+                        function show() { \Elementor_Logic_Controls::logic_show(); }
+                        function hide() { \Elementor_Logic_Controls::logic_hide(); }
+                        function contains($field, ...$values) { 
+                            return \Elementor_Logic_Controls::logic_contains($field, ...$values); 
+                        }
+                        function not_contains($field, ...$values) { 
+                            return \Elementor_Logic_Controls::logic_not_contains($field, ...$values); 
+                        }
+                        function is_empty($field) { 
+                            return \Elementor_Logic_Controls::logic_is_empty($field); 
+                        }
+                        function not_empty($field) { 
+                            return \Elementor_Logic_Controls::logic_not_empty($field); 
+                        }
+                    ');
+                    self::$functions_declared = true;
+                }
                 
-                // Execute the snippet
-                eval($snippet);
+                // Execute just the user's snippet
+                eval($settings['php_snippet']);
                 
             } catch (ParseError $e) {
                 error_log('Logic Parse Error: ' . $e->getMessage());
