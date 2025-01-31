@@ -60,10 +60,13 @@ class Elementor_Logic_Controls {
      */
     public static function init() {
         // Add logic controls to Elementor elements.
-        add_action('elementor/element/after_section_end', [__CLASS__, 'add_logic_controls'], 10, 3);
+        add_action( 'elementor/element/after_section_end', [ __CLASS__, 'add_logic_controls' ], 10, 3 );
 
-        // Process logic after rendering
-        add_action('elementor/frontend/after_render', [__CLASS__, 'collect_logic_snippets']);
+        // Process logic before rendering
+        add_action( 'elementor/frontend/before_render', [ __CLASS__, 'collect_logic_snippets' ] );
+
+        // Filter the final content to remove hidden elements
+        add_filter('elementor/frontend/the_content', [__CLASS__, 'remove_hidden_elements']);
 
         // Initialize CodeMirror for PHP editing
         //add_action('elementor/editor/after_enqueue_scripts', [ __CLASS__, 'initialize_codemirror' ] );
@@ -136,7 +139,7 @@ class Elementor_Logic_Controls {
     }
 
     /**
-     * Process logic snippets after rendering
+     * Process logic snippets before rendering
      */
     public static function collect_logic_snippets($element) {
         if (isset($_GET['action']) && 'elementor' === $_GET['action']) {
@@ -182,11 +185,9 @@ class Elementor_Logic_Controls {
                 $GLOBALS["pbn_show"] = false; // Show element if there's an error
             }
 
-            // If element should be hidden, inject removal script
+            // Add class if element should be hidden
             if (!$GLOBALS["pbn_show"]) {
-                if ( $element instanceof \Elementor\Widget_Base ) {
-                    $element->set_should_render(false);
-                }
+                $element->add_render_attribute('_wrapper', 'class', 'pbn_interview_hidden');
             }
 
             // Clean up global variable
@@ -248,5 +249,37 @@ class Elementor_Logic_Controls {
             ELC_VERSION,
             true
         );
+    }
+
+    /**
+     * Remove elements with pbn_interview_hidden class from content
+     * 
+     * @param string $content The rendered content
+     * @return string Modified content
+     */
+    public static function remove_hidden_elements($content) {
+        if (empty($content)) {
+            return $content;
+        }
+
+        // Load content into DOMDocument
+        $dom = new \DOMDocument();
+        libxml_use_internal_errors(true);
+        $dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+
+        // Find all elements with our class
+        $xpath = new \DOMXPath($dom);
+        $elements = $xpath->query("//*[contains(@class, 'pbn_interview_hidden')]");
+
+        // Remove each hidden element
+        foreach ($elements as $element) {
+            $element->parentNode->removeChild($element);
+        }
+
+        // Convert back to HTML string
+        $content = $dom->saveHTML();
+
+        return $content;
     }
 }
