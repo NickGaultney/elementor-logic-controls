@@ -3,7 +3,7 @@ window.logicAssistant = {
         const codeElement = event.target;
         const originalText = codeElement.textContent;
         
-        navigator.clipboard.writeText("$s['" + text + "']").then(() => {
+        navigator.clipboard.writeText("s('" + text + "')").then(() => {
             // Change appearance to show feedback
             codeElement.textContent = 'Copied!';
             codeElement.style.backgroundColor = '#4CAF50';
