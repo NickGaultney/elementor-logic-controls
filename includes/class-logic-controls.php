@@ -113,8 +113,8 @@ class Elementor_Logic_Controls {
                 'label'       => esc_html__('PHP Logic', 'elementor-logic-controls'),
                 'type'        => \Elementor\Controls_Manager::TEXTAREA,
                 'rows'        => 8,
-                'description' => esc_html__('Use $s[\'field_name\'] to access form fields. Call show() or hide() based on your conditions.', 'elementor-logic-controls'),
-                'default'     => "if (\$s['field_name'] === 'value') {\n    show();\n} else {\n    hide();\n}",
+                'description' => esc_html__('Use $s[\'field_name\'] to access form fields. Call show(); or hide(); based on your conditions.', 'elementor-logic-controls'),
+                'default'     => "if () {\n    show();\n} else {\n    hide();\n}",
                 'condition'   => [
                     'enable_logic' => 'yes',
                 ],
