@@ -189,9 +189,9 @@ class Elementor_Logic_Controls {
                 if ( 'container' === $element->get_type() ) {
                     // Use the container's unique selector as the key
                     $element->add_render_attribute(
-                        $element->get_unique_selector(),
-                        'style',
-                        'display: none;'
+                        '_wrapper', 
+                        'style', 
+                        'display: none;' 
                     );
                 }
             }
