@@ -66,7 +66,7 @@ class Elementor_Logic_Controls {
         add_action( 'elementor/frontend/before_render', [ __CLASS__, 'collect_logic_snippets' ] );
 
         // Initialize CodeMirror for PHP editing
-        add_action('elementor/editor/after_enqueue_scripts', [ __CLASS__, 'initialize_codemirror' ] );
+        //add_action('elementor/editor/after_enqueue_scripts', [ __CLASS__, 'initialize_codemirror' ] );
     }
 
     /**
@@ -143,60 +143,64 @@ class Elementor_Logic_Controls {
             return; // Skip in editor mode
         }
 
-        error_log( 'yes I was called' );
+        ?>
+            <div class="before-element">Text before element</div>
+        <?php
 
-        if (isset($settings['enable_logic']) && 'yes' === $settings['enable_logic'] && !empty($settings['php_snippet'])) {
-            $s = self::get_submission_data(); // Use $s as shorthand for submission
-            $GLOBALS["pbn_show"] = false;
+        // $settings = $element->get_settings_for_display();
 
-            function show() { 
-                $GLOBALS["pbn_show"] = true; 
-            }
+        // if (isset($settings['enable_logic']) && 'yes' === $settings['enable_logic'] && !empty($settings['php_snippet'])) {
+        //     $s = self::get_submission_data(); // Use $s as shorthand for submission
+        //     $GLOBALS["pbn_show"] = false;
+
+        //     function show() { 
+        //         $GLOBALS["pbn_show"] = true; 
+        //     }
             
-            function hide() { 
-                $GLOBALS["pbn_show"] = false; 
-            }
+        //     function hide() { 
+        //         $GLOBALS["pbn_show"] = false; 
+        //     }
             
-            function contains($field, ...$values) {
-                return isset($field) && is_array($field) && !empty(array_intersect($field, $values));
-            }
+        //     function contains($field, ...$values) {
+        //         return isset($field) && is_array($field) && !empty(array_intersect($field, $values));
+        //     }
             
-            function not_contains($field, ...$values) {
-                return isset($field) && is_array($field) && empty(array_intersect($field, $values));
-            }
+        //     function not_contains($field, ...$values) {
+        //         return isset($field) && is_array($field) && empty(array_intersect($field, $values));
+        //     }
             
-            function is_empty($field) {
-                return !isset($field) || empty($field);
-            }
+        //     function is_empty($field) {
+        //         return !isset($field) || empty($field);
+        //     }
             
-            function not_empty($field) {
-                return isset($field) && !empty($field);
-            }
+        //     function not_empty($field) {
+        //         return isset($field) && !empty($field);
+        //     }
             
-            try {
-                // Execute the snippet
-                eval($settings['php_snippet']);
+        //     try {
+        //         // Execute the snippet
+        //         eval($settings['php_snippet']);
                 
-            } catch (ParseError $e) {
-                error_log('Logic Parse Error: ' . $e->getMessage());
-                $GLOBALS["pbn_show"] = false; // Show element if there's an error
-            }
+        //     } catch (ParseError $e) {
+        //         error_log('Logic Parse Error: ' . $e->getMessage());
+        //         $GLOBALS["pbn_show"] = false; // Show element if there's an error
+        //     }
 
-            // Prevent rendering if hide() was called
-            if (!$GLOBALS["pbn_show"]) {
-                // For a Container:
-                if ( 'container' === $element->get_type() ) {
-                    // Use the container's unique selector as the key
-                    $element->add_render_attribute(
-                        '_wrapper', 
-                        'style', 
-                        'display: none;' 
-                    );
-                }
-            }
+        //     // Prevent rendering if hide() was called
+        //     if (!$GLOBALS["pbn_show"]) {
+        //         // For a Container:
+        //         if ( 'container' === $element->get_type() ) {
+        //             // Use the container's unique selector as the key
+        //             $element->add_render_attribute(
+        //                 '_wrapper', 
+        //                 'style', 
+        //                 'display: none;' 
+        //             );
+        //         }
+        //     }
 
-            // Clean up global variable
-            unset($GLOBALS["pbn_show"]);
+        //     // Clean up global variable
+        //     unset($GLOBALS["pbn_show"]);
         }
     }
     
