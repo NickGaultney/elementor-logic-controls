@@ -146,48 +146,44 @@ class Elementor_Logic_Controls {
         $settings = $element->get_settings_for_display();
 
         if (isset($settings['enable_logic']) && 'yes' === $settings['enable_logic'] && !empty($settings['php_snippet'])) {
-            $sub = self::get_submission_data(); // Use $s as shorthand for submission
+            $GLOBALS["pbn_submission"] = self::get_submission_data(); // Use $s as shorthand for submission
 
             function show() { 
-                $GLOBALS["show"] = true; 
+                $GLOBALS["pbn_show"] = true; 
             }
             
             function hide() { 
-                $GLOBALS["show"] = false; 
+                $GLOBALS["pbn_show"] = false; 
             }
             
             function contains($field, ...$values) {
-                global $sub;
-                return isset($sub[$field]) && is_array($sub[$field]) && !empty(array_intersect($sub[$field], $values));
+                return isset($GLOBALS["pbn_submission"][$field]) && is_array($GLOBALS["pbn_submission"][$field]) && !empty(array_intersect($GLOBALS["pbn_submission"][$field], $values));
             }
             
             function not_contains($field, ...$values) {
-                global $sub;
-                return isset($sub[$field]) && is_array($sub[$field]) && empty(array_intersect($sub[$field], $values));
+                return isset($GLOBALS["pbn_submission"][$field]) && is_array($GLOBALS["pbn_submission"][$field]) && empty(array_intersect($GLOBALS["pbn_submission"][$field], $values));
             }
             
             function is_empty($field) {
-                global $sub;
-                return !isset($sub[$field]) || empty($sub[$field]);
+                return !isset($GLOBALS["pbn_submission"][$field]) || empty($GLOBALS["pbn_submission"][$field]);
             }
             
             function not_empty($field) {
-                global $sub;
-                return isset($sub[$field]) && !empty($sub[$field]);
+                return isset($GLOBALS["pbn_submission"][$field]) && !empty($GLOBALS["pbn_submission"][$field]);
             }
             
             try {
-                $s = $sub;
+                $s = $GLOBALS["pbn_submission"];
                 // Execute the snippet
                 eval($settings['php_snippet']);
                 
             } catch (ParseError $e) {
                 error_log('Logic Parse Error: ' . $e->getMessage());
-                $GLOBALS["show"] = true; // Show element if there's an error
+                $GLOBALS["pbn_show"] = true; // Show element if there's an error
             }
 
             // Prevent rendering if hide() was called
-            if (!$GLOBALS["show"]) {
+            if (!$GLOBALS["pbn_show"]) {
                 // This will prevent the element from being rendered at all
                 $element->set_render_attribute('_wrapper', 'class', ['elementor-hidden', 'elementor-hidden-rendered']);
                 add_filter('elementor/element/get_child_type', function($child_type, $data) use ($element) {
@@ -201,7 +197,8 @@ class Elementor_Logic_Controls {
             }
 
             // Clean up global variable
-            unset($GLOBALS["show"]);
+            unset($GLOBALS["pbn_show"]);
+            unset($GLOBALS["pbn_submission"]);
         }
     }
     
