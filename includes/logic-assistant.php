@@ -15,7 +15,7 @@ class Elementor_Logic_Assistant {
     }
 
     /**
-     * Enqueue required styles
+     * Enqueue required styles and scripts
      */
     public static function enqueue_styles() {
         wp_enqueue_style(
@@ -24,6 +24,18 @@ class Elementor_Logic_Assistant {
             [],
             ELC_VERSION
         );
+
+        wp_enqueue_script(
+            'logic-assistant',
+            ELC_URL . 'assets/js/logic-assistant.js',
+            [],
+            ELC_VERSION,
+            true
+        );
+
+        wp_localize_script('logic-assistant', 'logicAssistant', [
+            'ajaxurl' => admin_url('admin-ajax.php')
+        ]);
     }
 
     /**
@@ -51,7 +63,7 @@ class Elementor_Logic_Assistant {
         ob_start();
         ?>
         <div class="logic-assistant-container">
-            <select id="form-selector" onchange="showFormFields(this.value)">
+            <select id="form-selector" onchange="logicAssistant.showFormFields(this.value)">
                 <option value="">Select a form</option>
                 <?php foreach ($forms as $form): ?>
                     <option value="<?php echo esc_attr($form->id); ?>">
@@ -62,69 +74,6 @@ class Elementor_Logic_Assistant {
 
             <div id="form-fields"></div>
         </div>
-
-        <script>
-        function copyToClipboard(text) {
-            const codeElement = event.target;
-            const originalText = codeElement.textContent;
-            
-            navigator.clipboard.writeText("$s['" + text + "']").then(() => {
-                // Change appearance to show feedback
-                codeElement.textContent = 'Copied!';
-                codeElement.style.backgroundColor = '#4CAF50';
-                codeElement.style.color = 'white';
-                
-                // Revert back after 1 second
-                setTimeout(() => {
-                    codeElement.textContent = originalText;
-                    codeElement.style.backgroundColor = '';
-                    codeElement.style.color = '';
-                }, 1000);
-            });
-        }
-
-        function showFormFields(formId) {
-            if (!formId) {
-                document.getElementById('form-fields').innerHTML = '';
-                return;
-            }
-
-            fetch(`<?php echo esc_url(admin_url('admin-ajax.php')); ?>?action=get_form_fields&form_id=${formId}`)
-                .then(response => response.json())
-                .then(data => {
-                    let html = '<div class="fields-list">';
-                    html += '<h3>Form Fields:</h3>';
-                    html += '<ul>';
-                    
-                    for (const [key, field] of Object.entries(data)) {
-                        html += `<li><code class="field-code" onclick="copyToClipboard('${key}')" title="Click to copy">${key}</code> - ${field.label}</li>`;
-                    }
-                    
-                    html += '</ul>';
-                    html += '</div>';
-                    
-                    document.getElementById('form-fields').innerHTML = html;
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('form-fields').innerHTML = 
-                        '<div class="logic-assistant-error">Error loading form fields</div>';
-                });
-        }
-        </script>
-
-        <style>
-        .field-code {
-            cursor: pointer;
-            padding: 2px 4px;
-            background: #f5f5f5;
-            border-radius: 3px;
-            transition: all 0.2s ease;
-        }
-        .field-code:hover {
-            background: #e0e0e0;
-        }
-        </style>
         <?php
         return ob_get_clean();
     }
