@@ -147,7 +147,7 @@ class Elementor_Logic_Controls {
 
         if (isset($settings['enable_logic']) && 'yes' === $settings['enable_logic'] && !empty($settings['php_snippet'])) {
             $GLOBALS["pbn_submission"] = self::get_submission_data(); // Use $s as shorthand for submission
-            GLOBALS["pbn_show"] = false;
+            $GLOBALS["pbn_show"] = false;
 
             function show() { 
                 $GLOBALS["pbn_show"] = true; 
