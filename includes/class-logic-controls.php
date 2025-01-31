@@ -184,19 +184,9 @@ class Elementor_Logic_Controls {
 
             // If element should be hidden, inject removal script
             if (!$GLOBALS["pbn_show"]) {
-                $element_id = $element->get_id();
-                
-                // Create script to remove the element
-                $script = "<script>
-                    (function() {
-                        var element = document.querySelector('[data-id=\"{$element_id}\"]');
-                        if (element) {
-                            element.remove();
-                        }
-                    })();
-                </script>";
-                
-                echo $script;
+                if ( $element instanceof \Elementor\Widget_Base ) {
+                    $element->set_should_render(false);
+                }
             }
 
             // Clean up global variable
