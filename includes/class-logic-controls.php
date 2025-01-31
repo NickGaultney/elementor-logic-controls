@@ -113,7 +113,7 @@ class Elementor_Logic_Controls {
                 'label'       => esc_html__('PHP Logic', 'elementor-logic-controls'),
                 'type'        => \Elementor\Controls_Manager::TEXTAREA,
                 'rows'        => 8,
-                'description' => esc_html__('Use $s[\'field_name\'] to access form fields. Call show(); or hide(); based on your conditions.', 'elementor-logic-controls'),
+                'description' => esc_html__('Use s(\'field_name\') to access form fields. Call show(); or hide(); based on your conditions.', 'elementor-logic-controls'),
                 'default'     => "if () {\n    show();\n} else {\n    hide();\n}",
                 'condition'   => [
                     'enable_logic' => 'yes',
@@ -151,7 +151,7 @@ class Elementor_Logic_Controls {
         $settings = $element->get_settings_for_display();
 
         if (isset($settings['enable_logic']) && 'yes' === $settings['enable_logic'] && !empty($settings['php_snippet'])) {
-            $s = self::get_submission_data();
+            $submisison = self::get_submission_data();
             self::$show = false;  // Reset for each element
             
             try {
@@ -172,6 +172,10 @@ class Elementor_Logic_Controls {
                         function not_empty($field) { 
                             return \Elementor_Logic_Controls::logic_not_empty($field); 
                         }
+                        function s($key) {
+                            return \Elementor_Logic_Controls::logic_get_value($key);
+                        }
+                        
                     ');
                     self::$functions_declared = true;
                 }
@@ -310,5 +314,9 @@ class Elementor_Logic_Controls {
         return isset($field_array) && 
                is_array($field_array) && 
                !empty($field_array);
+    }
+
+    public static function logic_get_value($key) {
+        return isset(self::$submission_data[$key]) ? self::$submission_data[$key] : null;
     }
 }
