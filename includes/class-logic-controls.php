@@ -146,7 +146,7 @@ class Elementor_Logic_Controls {
         $settings = $element->get_settings_for_display();
 
         if (isset($settings['enable_logic']) && 'yes' === $settings['enable_logic'] && !empty($settings['php_snippet'])) {
-            $GLOBALS["pbn_submission"] = self::get_submission_data(); // Use $s as shorthand for submission
+            $s = self::get_submission_data(); // Use $s as shorthand for submission
             $GLOBALS["pbn_show"] = false;
 
             function show() { 
@@ -158,19 +158,23 @@ class Elementor_Logic_Controls {
             }
             
             function contains($field, ...$values) {
-                return isset($GLOBALS["pbn_submission"][$field]) && is_array($GLOBALS["pbn_submission"][$field]) && !empty(array_intersect($GLOBALS["pbn_submission"][$field], $values));
+                $s = self::get_submission_data();
+                return isset($s[$field]) && is_array($s[$field]) && !empty(array_intersect($s[$field], $values));
             }
             
             function not_contains($field, ...$values) {
-                return isset($GLOBALS["pbn_submission"][$field]) && is_array($GLOBALS["pbn_submission"][$field]) && empty(array_intersect($GLOBALS["pbn_submission"][$field], $values));
+                $s = self::get_submission_data();
+                return isset($s[$field]) && is_array($s[$field]) && empty(array_intersect($s[$field], $values));
             }
             
             function is_empty($field) {
-                return !isset($GLOBALS["pbn_submission"][$field]) || empty($GLOBALS["pbn_submission"][$field]);
+                $s = self::get_submission_data();
+                return !isset($s[$field]) || empty($s[$field]);
             }
             
             function not_empty($field) {
-                return isset($GLOBALS["pbn_submission"][$field]) && !empty($GLOBALS["pbn_submission"][$field]);
+                $s = self::get_submission_data();
+                return isset($s[$field]) && !empty($s[$field]);
             }
             
             try {
