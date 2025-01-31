@@ -201,7 +201,7 @@ class Elementor_Logic_Controls {
 
         //     // Clean up global variable
         //     unset($GLOBALS["pbn_show"]);
-        }
+        //}
     }
     
     /**
