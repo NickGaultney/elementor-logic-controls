@@ -158,27 +158,22 @@ class Elementor_Logic_Controls {
             }
             
             function contains($field, ...$values) {
-                $s = self::get_submission_data();
-                return isset($s[$field]) && is_array($s[$field]) && !empty(array_intersect($s[$field], $values));
+                return isset($field) && is_array($field) && !empty(array_intersect($field, $values));
             }
             
             function not_contains($field, ...$values) {
-                $s = self::get_submission_data();
-                return isset($s[$field]) && is_array($s[$field]) && empty(array_intersect($s[$field], $values));
+                return isset($field) && is_array($field) && empty(array_intersect($field, $values));
             }
             
             function is_empty($field) {
-                $s = self::get_submission_data();
-                return !isset($s[$field]) || empty($s[$field]);
+                return !isset($field) || empty($field);
             }
             
             function not_empty($field) {
-                $s = self::get_submission_data();
-                return isset($s[$field]) && !empty($s[$field]);
+                return isset($field) && !empty($field);
             }
             
             try {
-                $s = $GLOBALS["pbn_submission"];
                 // Execute the snippet
                 eval($settings['php_snippet']);
                 
