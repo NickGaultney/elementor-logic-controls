@@ -11,6 +11,7 @@ class Elementor_Logic_Controls {
      * @var array|null
      */
     private static $submission_data = null;
+    private static $show = false;  // Add class property to track visibility
 
     /**
      * Get submission data, fetching only once per page load
@@ -149,49 +150,40 @@ class Elementor_Logic_Controls {
         $settings = $element->get_settings_for_display();
 
         if (isset($settings['enable_logic']) && 'yes' === $settings['enable_logic'] && !empty($settings['php_snippet'])) {
-            $s = self::get_submission_data(); // Use $s as shorthand for submission
-            $GLOBALS["pbn_show"] = false;
-
-            function show() { 
-                $GLOBALS["pbn_show"] = true; 
-            }
-            
-            function hide() { 
-                $GLOBALS["pbn_show"] = false; 
-            }
-            
-            function contains($field, ...$values) {
-                return isset($field) && is_array($field) && !empty(array_intersect($field, $values));
-            }
-            
-            function not_contains($field, ...$values) {
-                return isset($field) && is_array($field) && empty(array_intersect($field, $values));
-            }
-            
-            function is_empty($field) {
-                return !isset($field) || empty($field);
-            }
-            
-            function not_empty($field) {
-                return isset($field) && !empty($field);
-            }
+            $s = self::get_submission_data();
+            self::$show = false;  // Reset for each element
             
             try {
+                // Create the snippet with function aliases
+                $snippet = '
+                    function show() { \Elementor_Logic_Controls::logic_show(); }
+                    function hide() { \Elementor_Logic_Controls::logic_hide(); }
+                    function contains($field, ...$values) { 
+                        return \Elementor_Logic_Controls::logic_contains($field, ...$values); 
+                    }
+                    function not_contains($field, ...$values) { 
+                        return \Elementor_Logic_Controls::logic_not_contains($field, ...$values); 
+                    }
+                    function is_empty($field) { 
+                        return \Elementor_Logic_Controls::logic_is_empty($field); 
+                    }
+                    function not_empty($field) { 
+                        return \Elementor_Logic_Controls::logic_not_empty($field); 
+                    }
+                    ' . $settings['php_snippet'];
+                
                 // Execute the snippet
-                eval($settings['php_snippet']);
+                eval($snippet);
                 
             } catch (ParseError $e) {
                 error_log('Logic Parse Error: ' . $e->getMessage());
-                $GLOBALS["pbn_show"] = false; // Show element if there's an error
+                self::$show = false;
             }
 
             // Add class if element should be hidden
-            if (!$GLOBALS["pbn_show"]) {
+            if (!self::$show) {
                 $element->add_render_attribute('_wrapper', 'class', 'pbn_interview_hidden');
             }
-
-            // Clean up global variable
-            unset($GLOBALS["pbn_show"]);
         }
     }
     
@@ -281,5 +273,38 @@ class Elementor_Logic_Controls {
         $content = $dom->saveHTML();
 
         return $content;
+    }
+
+    // Helper functions moved outside of collect_logic_snippets
+    private static function logic_show() {
+        self::$show = true;
+    }
+    
+    private static function logic_hide() {
+        self::$show = false;
+    }
+    
+    private static function logic_contains($field_array, ...$values) {
+        return isset($field_array) && 
+               is_array($field_array) && 
+               !empty(array_intersect($field_array, $values));
+    }
+    
+    private static function logic_not_contains($field_array, ...$values) {
+        return isset($field_array) && 
+               is_array($field_array) && 
+               empty(array_intersect($field_array, $values));
+    }
+    
+    private static function logic_is_empty($field_array) {
+        return !isset($field_array) || 
+               !is_array($field_array) || 
+               empty($field_array);
+    }
+    
+    private static function logic_not_empty($field_array) {
+        return isset($field_array) && 
+               is_array($field_array) && 
+               !empty($field_array);
     }
 }
