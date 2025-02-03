@@ -82,19 +82,36 @@ class Elementor_Logic_Assistant {
             <div id="field-list" class="tool-panel"></div>
             <div id="logic-builder" class="tool-panel" style="display: none;">
                 <div class="logic-builder-form">
-                    <select id="field-selector" onchange="logicAssistant.updateOperators(this)">
-                        <option value="">Select a field</option>
-                    </select>
-                    
-                    <select id="operator-selector" onchange="logicAssistant.updatePreview()">
-                        <option value="">Select an operator</option>
-                    </select>
-                    
-                    <input type="text" id="value-input" placeholder="Enter value" onkeyup="logicAssistant.updatePreview()">
-                    
+                    <div id="conditions-container">
+                        <div class="condition-group">
+                            <div class="condition" data-index="0">
+                                <select class="field-selector" onchange="logicAssistant.updateOperators(this)">
+                                    <option value="">Select a field</option>
+                                </select>
+                                
+                                <select class="operator-selector" onchange="logicAssistant.updatePreview()">
+                                    <option value="">Select an operator</option>
+                                </select>
+                                
+                                <input type="text" class="value-input" placeholder="Enter value" onkeyup="logicAssistant.updatePreview()">
+                                
+                                <button type="button" class="remove-condition" onclick="logicAssistant.removeCondition(this)" style="display: none;">×</button>
+                            </div>
+                        </div>
+                        
+                        <div class="condition-controls">
+                            <button type="button" onclick="logicAssistant.addCondition()" class="add-condition">Add Condition</button>
+                            <select id="logic-operator" onchange="logicAssistant.updatePreview()">
+                                <option value="&&">AND</option>
+                                <option value="||">OR</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div id="code-preview" class="code-preview">
                         <h4>Generated Code:</h4>
                         <pre><code></code></pre>
+                        <button type="button" onclick="logicAssistant.copyGeneratedCode()" class="copy-code">Copy Code</button>
                     </div>
                 </div>
             </div>

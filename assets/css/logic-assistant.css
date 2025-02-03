@@ -130,4 +130,62 @@
     background: #fff;
     border: 1px solid #ddd;
     border-radius: 4px;
+}
+
+.condition {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.condition select, 
+.condition input {
+    flex: 1;
+}
+
+.condition-controls {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+    align-items: center;
+}
+
+.remove-condition {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    padding: 0;
+}
+
+.add-condition {
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.copy-code {
+    margin-top: 10px;
+    background: #0073aa;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+#logic-operator {
+    width: auto;
+    margin: 0;
 } 

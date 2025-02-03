@@ -36,7 +36,7 @@ window.logicAssistant = {
             .then(data => {
                 this.currentFields = data;
                 this.updateFieldList(data);
-                this.updateFieldSelector(data);
+                this.updateFieldSelectors();
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -51,7 +51,8 @@ window.logicAssistant = {
         html += '<ul>';
         
         for (const [key, field] of Object.entries(data)) {
-            html += `<li><code class="field-code" onclick="logicAssistant.copyToClipboard('${key}')" title="Click to copy">${key}</code> - ${field.label}</li>`;
+            const label = field.label || key;
+            html += `<li><code class="field-code" onclick="logicAssistant.copyToClipboard('${key}')" title="Click to copy">${key}</code> - ${label}</li>`;
         }
         
         html += '</ul>';
@@ -60,18 +61,9 @@ window.logicAssistant = {
         document.getElementById('field-list').innerHTML = html;
     },
 
-    updateFieldSelector: function(data) {
-        const selector = document.getElementById('field-selector');
-        selector.innerHTML = '<option value="">Select a field</option>';
-        
-        for (const [key, field] of Object.entries(data)) {
-            selector.innerHTML += `<option value="${key}">${field.label}</option>`;
-        }
-    },
-
     updateOperators: function(fieldSelect) {
         const field = this.currentFields[fieldSelect.value];
-        const operatorSelect = document.getElementById('operator-selector');
+        const operatorSelect = fieldSelect.closest('.condition').querySelector('.operator-selector');
         operatorSelect.innerHTML = '<option value="">Select an operator</option>';
         
         if (field) {
@@ -95,36 +87,100 @@ window.logicAssistant = {
         this.updatePreview();
     },
 
-    updatePreview: function() {
-        const field = document.getElementById('field-selector').value;
-        const operator = document.getElementById('operator-selector').value;
-        const value = document.getElementById('value-input').value;
+    addCondition: function() {
+        const container = document.querySelector('.condition-group');
+        const newIndex = container.children.length;
+        const template = document.querySelector('.condition').cloneNode(true);
         
-        let code = '';
-        if (field && operator) {
-            switch(operator) {
-                case 'contains':
-                    code = `if (contains('${field}', "${value}")) {\n    show();\n} else {\n    hide();\n}`;
-                    break;
-                case 'not_contains':
-                    code = `if (not_contains('${field}', "${value}")) {\n    show();\n} else {\n    hide();\n}`;
-                    break;
-                case 'equals':
-                    code = `if (s('${field}') === "${value}") {\n    show();\n} else {\n    hide();\n}`;
-                    break;
-                case 'not_equals':
-                    code = `if (s('${field}') !== "${value}") {\n    show();\n} else {\n    hide();\n}`;
-                    break;
-                case 'is_empty':
-                    code = `if (is_empty('${field}')) {\n    show();\n} else {\n    hide();\n}`;
-                    break;
-                case 'not_empty':
-                    code = `if (not_empty('${field}')) {\n    show();\n} else {\n    hide();\n}`;
-                    break;
+        template.dataset.index = newIndex;
+        template.querySelector('.field-selector').value = '';
+        template.querySelector('.operator-selector').innerHTML = '<option value="">Select an operator</option>';
+        template.querySelector('.value-input').value = '';
+        template.querySelector('.remove-condition').style.display = 'block';
+        
+        container.appendChild(template);
+        this.updateFieldSelectors();
+        this.updatePreview();
+    },
+
+    removeCondition: function(button) {
+        const condition = button.closest('.condition');
+        if (document.querySelectorAll('.condition').length > 1) {
+            condition.remove();
+            this.updatePreview();
+        }
+    },
+
+    updatePreview: function() {
+        const conditions = [];
+        const logicOperator = document.getElementById('logic-operator').value;
+        
+        document.querySelectorAll('.condition').forEach(condition => {
+            const field = condition.querySelector('.field-selector').value;
+            const operator = condition.querySelector('.operator-selector').value;
+            const value = condition.querySelector('.value-input').value;
+            
+            if (field && operator) {
+                let conditionCode = '';
+                switch(operator) {
+                    case 'contains':
+                        conditionCode = `contains('${field}', "${value}")`;
+                        break;
+                    case 'not_contains':
+                        conditionCode = `not_contains('${field}', "${value}")`;
+                        break;
+                    case 'equals':
+                        conditionCode = `s('${field}') === "${value}"`;
+                        break;
+                    case 'not_equals':
+                        conditionCode = `s('${field}') !== "${value}"`;
+                        break;
+                    case 'is_empty':
+                        conditionCode = `is_empty('${field}')`;
+                        break;
+                    case 'not_empty':
+                        conditionCode = `not_empty('${field}')`;
+                        break;
+                }
+                if (conditionCode) {
+                    conditions.push(conditionCode);
+                }
             }
+        });
+
+        let code = '';
+        if (conditions.length > 0) {
+            code = `if (${conditions.join(` ${logicOperator} `)}) {\n    show();\n} else {\n    hide();\n}`;
         }
         
         document.querySelector('#code-preview code').textContent = code;
+    },
+
+    copyGeneratedCode: function() {
+        const code = document.querySelector('#code-preview code').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            const button = document.querySelector('.copy-code');
+            const originalText = button.textContent;
+            button.textContent = 'Copied!';
+            button.style.backgroundColor = '#28a745';
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.backgroundColor = '';
+            }, 1000);
+        });
+    },
+
+    updateFieldSelectors: function() {
+        document.querySelectorAll('.field-selector').forEach(selector => {
+            if (selector.options.length <= 1) {
+                selector.innerHTML = '<option value="">Select a field</option>';
+                for (const [key, field] of Object.entries(this.currentFields)) {
+                    const label = field.label || key;
+                    selector.innerHTML += `<option value="${key}">${label}</option>`;
+                }
+            }
+        });
     },
 
     copyToClipboard: function(text) {
