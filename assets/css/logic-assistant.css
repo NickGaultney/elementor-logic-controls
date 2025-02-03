@@ -130,6 +130,16 @@
     background: #fff;
     border: 1px solid #ddd;
     border-radius: 4px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+.code-preview code {
+    display: block;
+    line-height: 1.5;
+    font-family: monospace;
 }
 
 .condition {
@@ -188,4 +198,77 @@
 #logic-operator {
     width: auto;
     margin: 0;
+}
+
+.condition-group {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #f8f9fa;
+}
+
+.group-header {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.group-operator {
+    width: auto !important;
+    margin: 0 !important;
+}
+
+.group-controls {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+}
+
+.global-controls {
+    margin-top: 20px;
+}
+
+.add-group {
+    background: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.remove-group {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    padding: 0;
+}
+
+.global-operator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.global-operator label {
+    font-weight: bold;
+    color: #333;
+}
+
+.global-operator select {
+    width: auto !important;
+    margin: 0 !important;
 } 

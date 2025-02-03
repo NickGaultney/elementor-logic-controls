@@ -82,8 +82,23 @@ class Elementor_Logic_Assistant {
             <div id="field-list" class="tool-panel"></div>
             <div id="logic-builder" class="tool-panel" style="display: none;">
                 <div class="logic-builder-form">
+                    <div class="global-operator">
+                        <label>Join Groups With:</label>
+                        <select id="global-operator" onchange="logicAssistant.updatePreview()">
+                            <option value="||">OR</option>
+                            <option value="&&">AND</option>
+                        </select>
+                    </div>
+                    
                     <div id="conditions-container">
-                        <div class="condition-group">
+                        <div class="condition-group" data-group="0">
+                            <div class="group-header">
+                                <select class="group-operator" onchange="logicAssistant.updatePreview()">
+                                    <option value="&&">AND</option>
+                                    <option value="||">OR</option>
+                                </select>
+                                <button type="button" class="remove-group" onclick="logicAssistant.removeGroup(this)" style="display: none;">×</button>
+                            </div>
                             <div class="condition" data-index="0">
                                 <select class="field-selector" onchange="logicAssistant.updateOperators(this)">
                                     <option value="">Select a field</option>
@@ -97,14 +112,13 @@ class Elementor_Logic_Assistant {
                                 
                                 <button type="button" class="remove-condition" onclick="logicAssistant.removeCondition(this)" style="display: none;">×</button>
                             </div>
+                            <div class="group-controls">
+                                <button type="button" onclick="logicAssistant.addCondition(this)" class="add-condition">Add Condition</button>
+                            </div>
                         </div>
                         
-                        <div class="condition-controls">
-                            <button type="button" onclick="logicAssistant.addCondition()" class="add-condition">Add Condition</button>
-                            <select id="logic-operator" onchange="logicAssistant.updatePreview()">
-                                <option value="&&">AND</option>
-                                <option value="||">OR</option>
-                            </select>
+                        <div class="global-controls">
+                            <button type="button" onclick="logicAssistant.addGroup()" class="add-group">Add Group</button>
                         </div>
                     </div>
 
@@ -192,10 +206,27 @@ class Elementor_Logic_Assistant {
                     if (!isset($field["attributes"]['name']) || !isset($field["settings"]['label'])) {
                         continue;
                     }
+                    
                     $field_data[$field["attributes"]['name']] = [
                         'label' => $field["settings"]['label'],
-                        'type' => $field["element"]
+                        'type' => $field["element"],
+                        'options' => []
                     ];
+
+                    // Add options for select and radio fields
+                    if (in_array($field["element"], ['select', 'input_radio']) && 
+                        isset($field["settings"]['advanced_options'])) {
+                        $options = [];
+                        foreach ($field["settings"]['advanced_options'] as $option) {
+                            if (isset($option['value']) && isset($option['label'])) {
+                                $options[] = [
+                                    'value' => $option['value'],
+                                    'label' => $option['label']
+                                ];
+                            }
+                        }
+                        $field_data[$field["attributes"]['name']]['options'] = $options;
+                    }
                 }
             }
         }
