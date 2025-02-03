@@ -143,7 +143,7 @@ class Elementor_Logic_Controls {
                 // Only declare functions once
                 if (!self::$functions_declared) {
                     eval('
-                        $today = date(\'m-d-Y\');
+                        $today = DateTime(\'m-d-Y\');
                         function show() { \Elementor_Logic_Controls::logic_show(); }
                         function hide() { \Elementor_Logic_Controls::logic_hide(); }
                         function contains($field, ...$values) { 
