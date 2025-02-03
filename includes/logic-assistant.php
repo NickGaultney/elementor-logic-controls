@@ -63,7 +63,7 @@ class Elementor_Logic_Assistant {
         ob_start();
         ?>
         <div class="logic-assistant-container">
-            <select id="form-selector" onchange="logicAssistant.showFormFields(this.value)">
+            <select id="form-selector" onchange="logicAssistant.showTools(this.value)">
                 <option value="">Select a form</option>
                 <?php foreach ($forms as $form): ?>
                     <option value="<?php echo esc_attr($form->id); ?>">
@@ -72,7 +72,32 @@ class Elementor_Logic_Assistant {
                 <?php endforeach; ?>
             </select>
 
-            <div id="form-fields"></div>
+            <div id="tool-selector" style="display: none;">
+                <div class="tool-buttons">
+                    <button onclick="logicAssistant.selectTool('field-list')" class="tool-button active">Field List</button>
+                    <button onclick="logicAssistant.selectTool('logic-builder')" class="tool-button">Logic Builder</button>
+                </div>
+            </div>
+
+            <div id="field-list" class="tool-panel"></div>
+            <div id="logic-builder" class="tool-panel" style="display: none;">
+                <div class="logic-builder-form">
+                    <select id="field-selector" onchange="logicAssistant.updateOperators(this)">
+                        <option value="">Select a field</option>
+                    </select>
+                    
+                    <select id="operator-selector" onchange="logicAssistant.updatePreview()">
+                        <option value="">Select an operator</option>
+                    </select>
+                    
+                    <input type="text" id="value-input" placeholder="Enter value" onkeyup="logicAssistant.updatePreview()">
+                    
+                    <div id="code-preview" class="code-preview">
+                        <h4>Generated Code:</h4>
+                        <pre><code></code></pre>
+                    </div>
+                </div>
+            </div>
         </div>
         <?php
         return ob_get_clean();
