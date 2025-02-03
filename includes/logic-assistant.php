@@ -213,8 +213,8 @@ class Elementor_Logic_Assistant {
                         'options' => []
                     ];
 
-                    // Add options for select and radio fields
-                    if (in_array($field["element"], ['select', 'input_radio']) && 
+                    // Add options for select, radio, and checkbox fields
+                    if (in_array($field["element"], ['select', 'input_radio', 'input_checkbox']) && 
                         isset($field["settings"]['advanced_options'])) {
                         $options = [];
                         foreach ($field["settings"]['advanced_options'] as $option) {

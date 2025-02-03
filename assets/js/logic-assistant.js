@@ -91,13 +91,27 @@ window.logicAssistant = {
                     select.onchange = () => this.updatePreview();
                     valueInput.replaceWith(select);
                 }
-            } else if (field.type === 'checkbox') {
+            } else if (field.type === 'input_checkbox') {
                 operatorSelect.innerHTML += `
                     <option value="contains">contains</option>
                     <option value="not_contains">does not contain</option>
                     <option value="is_empty">is empty</option>
                     <option value="not_empty">is not empty</option>
                 `;
+                
+                // Convert text input to select if we have options
+                if (field.options && field.options.length > 0) {
+                    const select = document.createElement('select');
+                    select.className = 'value-input';
+                    select.innerHTML = '<option value="">Select a value</option>';
+                    
+                    field.options.forEach(option => {
+                        select.innerHTML += `<option value="${option.value}">${option.label}</option>`;
+                    });
+                    
+                    select.onchange = () => this.updatePreview();
+                    valueInput.replaceWith(select);
+                }
             } else {
                 operatorSelect.innerHTML += `
                     <option value="equals">equals</option>
@@ -205,13 +219,14 @@ window.logicAssistant = {
                     let conditionCode = '';
                     switch(operator) {
                         case 'contains':
-                            conditionCode = `contains('${field}', "${value}")`;
+                            conditionCode = `contains(s(${field}), "${value}")`;
                             break;
                         case 'not_contains':
-                            conditionCode = `not_contains('${field}', "${value}")`;
+                            conditionCode = `not_contains(s(${field}), "${value}")`;
                             break;
                         case 'equals':
                             conditionCode = `s('${field}') === "${value}"`;
+
                             break;
                         case 'not_equals':
                             conditionCode = `s('${field}') !== "${value}"`;
