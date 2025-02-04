@@ -219,10 +219,11 @@ window.logicAssistant = {
                     let conditionCode = '';
                     switch(operator) {
                         case 'contains':
-                            conditionCode = `contains(s(${field}), "${value}")`;
+                            conditionCode = `contains(s("${field}"), "${value}")`;
                             break;
                         case 'not_contains':
-                            conditionCode = `not_contains(s(${field}), "${value}")`;
+                            conditionCode = `not_contains(s("${field}"), "${value}")`;
+
                             break;
                         case 'equals':
                             conditionCode = `s('${field}') === "${value}"`;
