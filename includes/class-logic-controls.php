@@ -249,12 +249,9 @@ class Elementor_Logic_Controls {
         }
 
         // Load content into DOMDocument
-        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $dom = new \DOMDocument();
         libxml_use_internal_errors(true);
-        
-        // Properly handle UTF-8 content
-        $content = '<?xml encoding="UTF-8">' . $content;
-        $dom->loadHTML($content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        $dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
 
         // Find all elements with our class
@@ -266,9 +263,8 @@ class Elementor_Logic_Controls {
             $element->parentNode->removeChild($element);
         }
 
-        // Convert back to HTML string, removing the XML declaration
+        // Convert back to HTML string
         $content = $dom->saveHTML();
-        $content = preg_replace('~<?xml encoding="UTF-8">\s*~', '', $content);
 
         return $content;
     }
