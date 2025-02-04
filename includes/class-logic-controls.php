@@ -142,30 +142,28 @@ class Elementor_Logic_Controls {
             try {
                 // Only declare functions once
                 if (!self::$functions_declared) {
-                    eval('
-                        $today = (new DateTime())->format("m/d/Y");
-                        function show() { \Elementor_Logic_Controls::logic_show(); }
-                        function hide() { \Elementor_Logic_Controls::logic_hide(); }
-                        function contains($field, ...$values) { 
-                            return \Elementor_Logic_Controls::logic_contains($field, ...$values); 
-                        }
-                        function not_contains($field, ...$values) { 
-                            return \Elementor_Logic_Controls::logic_not_contains($field, ...$values); 
-                        }
-                        function is_empty($field) { 
-                            return \Elementor_Logic_Controls::logic_is_empty($field); 
-                        }
-                        function not_empty($field) { 
-                            return \Elementor_Logic_Controls::logic_not_empty($field); 
-                        }
-                        function s($key) {
-                            return \Elementor_Logic_Controls::logic_get_value($key);
-                        }
+                    function show() { \Elementor_Logic_Controls::logic_show(); }
+                    function hide() { \Elementor_Logic_Controls::logic_hide(); }
+                    function contains($field, ...$values) { 
+                        return \Elementor_Logic_Controls::logic_contains($field, ...$values); 
+                    }
+                    function not_contains($field, ...$values) { 
+                        return \Elementor_Logic_Controls::logic_not_contains($field, ...$values); 
+                    }
+                    function is_empty($field) { 
+                        return \Elementor_Logic_Controls::logic_is_empty($field); 
+                    }
+                    function not_empty($field) { 
+                        return \Elementor_Logic_Controls::logic_not_empty($field); 
+                    }
+                    function s($key) {
+                        return \Elementor_Logic_Controls::logic_get_value($key);
+                    }
                         
-                    ');
                     self::$functions_declared = true;
                 }
                 
+                $today = (new DateTime())->format("m/d/Y");
                 // Execute just the user's snippet
                 eval($settings['php_snippet']);
                 
