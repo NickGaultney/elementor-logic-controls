@@ -162,8 +162,10 @@ class Elementor_Logic_Controls {
                         
                     self::$functions_declared = true;
                 }
-                
+
+                // Add any variables you need to use in the snippet
                 $today = (new DateTime())->format("m/d/Y");
+                
                 // Execute just the user's snippet
                 eval($settings['php_snippet']);
                 
