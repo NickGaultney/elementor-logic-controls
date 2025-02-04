@@ -251,7 +251,10 @@ class Elementor_Logic_Controls {
         // Load content into DOMDocument
         $dom = new \DOMDocument();
         libxml_use_internal_errors(true);
-        $dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        
+        // Use htmlspecialchars instead of mb_convert_encoding
+        $content = htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
+        $dom->loadHTML($content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
 
         // Find all elements with our class
@@ -263,8 +266,9 @@ class Elementor_Logic_Controls {
             $element->parentNode->removeChild($element);
         }
 
-        // Convert back to HTML string
+        // Convert back to HTML string and decode entities
         $content = $dom->saveHTML();
+        $content = html_entity_decode($content, ENT_QUOTES, 'UTF-8');
 
         return $content;
     }
