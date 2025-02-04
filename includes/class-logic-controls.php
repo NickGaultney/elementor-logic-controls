@@ -249,11 +249,11 @@ class Elementor_Logic_Controls {
         }
 
         // Load content into DOMDocument
-        $dom = new \DOMDocument();
+        $dom = new \DOMDocument('1.0', 'UTF-8');
         libxml_use_internal_errors(true);
         
-        // Use htmlspecialchars instead of mb_convert_encoding
-        $content = htmlspecialchars($content, ENT_QUOTES, 'UTF-8');
+        // Properly handle UTF-8 content
+        $content = '<?xml encoding="UTF-8">' . $content;
         $dom->loadHTML($content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
 
@@ -266,9 +266,9 @@ class Elementor_Logic_Controls {
             $element->parentNode->removeChild($element);
         }
 
-        // Convert back to HTML string and decode entities
+        // Convert back to HTML string, removing the XML declaration
         $content = $dom->saveHTML();
-        $content = html_entity_decode($content, ENT_QUOTES, 'UTF-8');
+        $content = preg_replace('~<?xml encoding="UTF-8">\s*~', '', $content);
 
         return $content;
     }
