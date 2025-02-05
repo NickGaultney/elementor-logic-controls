@@ -129,8 +129,14 @@ class Elementor_Logic_Controls {
      * Process logic snippets before rendering
      */
     public static function collect_logic_snippets($element) {
+        // Skip in editor mode
         if (isset($_GET['action']) && 'elementor' === $_GET['action']) {
-            return; // Skip in editor mode
+            return;
+        }
+
+        // Only run on "Results" post type
+        if (get_post_type() !== 'results') {
+            return;
         }
 
         $settings = $element->get_settings_for_display();
@@ -244,6 +250,11 @@ class Elementor_Logic_Controls {
      * @return string Modified content
      */
     public static function remove_hidden_elements($content) {
+        // Only process on "Results" post type
+        if (get_post_type() !== 'results') {
+            return $content;
+        }
+
         if (empty($content)) {
             return $content;
         }
