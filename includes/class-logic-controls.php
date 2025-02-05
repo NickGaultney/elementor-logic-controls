@@ -82,6 +82,11 @@ class Elementor_Logic_Controls {
      * @param array $args
      */
     public static function add_logic_controls( $element, $section_id, $args ) {
+        // Only show logic controls for "result" post type
+        if (get_post_type() !== 'result') {
+            return;
+        }
+
         if ( 'section_custom_css' !== $section_id ) {
             return;
         }
@@ -133,10 +138,9 @@ class Elementor_Logic_Controls {
         if (isset($_GET['action']) && 'elementor' === $_GET['action']) {
             return;
         }
-        do_action( 'qm/debug', get_post_type() );
 
         // Only run on "Results" post type
-        if (get_post_type() !== 'results') {
+        if (get_post_type() !== 'result') {
             return;
         }
 
@@ -252,7 +256,7 @@ class Elementor_Logic_Controls {
      */
     public static function remove_hidden_elements($content) {
         // Only process on "Results" post type
-        if (get_post_type() !== 'results') {
+        if (get_post_type() !== 'result') {
             return $content;
         }
 
