@@ -133,6 +133,7 @@ class Elementor_Logic_Controls {
         if (isset($_GET['action']) && 'elementor' === $_GET['action']) {
             return;
         }
+        do_action( 'qm/debug', get_post_type() );
 
         // Only run on "Results" post type
         if (get_post_type() !== 'results') {
