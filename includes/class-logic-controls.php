@@ -109,6 +109,7 @@ class Elementor_Logic_Controls {
                 'return_value' => 'yes',
                 'default'      => '',
                 'render_type'  => 'none',
+                'copy_style'   => false,
             ]
         );
 
@@ -124,7 +125,7 @@ class Elementor_Logic_Controls {
                     'enable_logic' => 'yes',
                 ],
                 'render_type' => 'none',
-                'selectors_excluded' => true,
+                'copy_style'  => false,
             ]
         );
 
