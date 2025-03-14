@@ -124,6 +124,7 @@ class Elementor_Logic_Controls {
                     'enable_logic' => 'yes',
                 ],
                 'render_type' => 'none',
+                'selectors_excluded' => true,
             ]
         );
 
